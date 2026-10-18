@@ -1,0 +1,18 @@
+export const navigation = {
+  n_dashboard: 'Dashboard',
+  n_employees: 'Employees',
+  n_departments: 'Departments',
+  n_positions: 'Positions',
+  n_contracts: 'Contracts',
+  n_attendance: 'Attendance & QR',
+  n_leaves: 'Leave Requests',
+  n_payroll: 'Payroll',
+  n_salaries: 'Base Salaries',
+  n_bonus_penalty: 'Bonus & Penalty',
+  n_reports: 'Reports & Export',
+  n_roles: 'Roles & Accounts',
+  n_profile: 'My Profile',
+  n_menu_title: 'Admin Menu',
+  n_system_title: 'System',
+  n_sub_title: 'HR Management',
+};

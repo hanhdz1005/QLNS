@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/BE/">
+    <Project Path="QLNS.API/QLNS.API.csproj" Id="a8365435-84af-488f-ac0d-1fbedb57ac92" />
+    <Project Path="QLNS.Core/QLNS.Core.csproj" Id="fc48defb-c347-4a23-9729-e09633f74926" />
+    <Project Path="QLNS.Infrastructure/QLNS.Infrastructure.csproj" />
+  </Folder>
+</Solution>

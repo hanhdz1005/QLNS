@@ -1,0 +1,149 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\Blazor study\\QLNS\\QLNS.API\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{4F252647-E8DF-7E9A-7761-8815741C4A4F}|QLNS.Infrastructure\\QLNS.Infrastructure.csproj|d:\\blazor study\\qlns\\qlns.api\\qlns.infrastructure\\data\\migration\\20260928023311_in.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4F252647-E8DF-7E9A-7761-8815741C4A4F}|QLNS.Infrastructure\\QLNS.Infrastructure.csproj|solutionrelative:qlns.infrastructure\\data\\migration\\20260928023311_in.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A8365435-84AF-488F-AC0D-1FBEDB57AC92}|QLNS.API\\QLNS.API.csproj|d:\\blazor study\\qlns\\qlns.api\\qlns.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A8365435-84AF-488F-AC0D-1FBEDB57AC92}|QLNS.API\\QLNS.API.csproj|solutionrelative:qlns.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FC48DEFB-C347-4A23-9729-E09633F74926}|QLNS.Core\\QLNS.Core.csproj|d:\\blazor study\\qlns\\qlns.api\\qlns.core\\entities\\attendance.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FC48DEFB-C347-4A23-9729-E09633F74926}|QLNS.Core\\QLNS.Core.csproj|solutionrelative:qlns.core\\entities\\attendance.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FC48DEFB-C347-4A23-9729-E09633F74926}|QLNS.Core\\QLNS.Core.csproj|d:\\blazor study\\qlns\\qlns.api\\qlns.core\\entities\\department.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FC48DEFB-C347-4A23-9729-E09633F74926}|QLNS.Core\\QLNS.Core.csproj|solutionrelative:qlns.core\\entities\\department.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FC48DEFB-C347-4A23-9729-E09633F74926}|QLNS.Core\\QLNS.Core.csproj|d:\\blazor study\\qlns\\qlns.api\\qlns.core\\entities\\bonuspenalty.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FC48DEFB-C347-4A23-9729-E09633F74926}|QLNS.Core\\QLNS.Core.csproj|solutionrelative:qlns.core\\entities\\bonuspenalty.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FC48DEFB-C347-4A23-9729-E09633F74926}|QLNS.Core\\QLNS.Core.csproj|d:\\blazor study\\qlns\\qlns.api\\qlns.core\\services\\departmentservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FC48DEFB-C347-4A23-9729-E09633F74926}|QLNS.Core\\QLNS.Core.csproj|solutionrelative:qlns.core\\services\\departmentservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A8365435-84AF-488F-AC0D-1FBEDB57AC92}|QLNS.API\\QLNS.API.csproj|d:\\blazor study\\qlns\\qlns.api\\qlns.api\\controllers\\departmentcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A8365435-84AF-488F-AC0D-1FBEDB57AC92}|QLNS.API\\QLNS.API.csproj|solutionrelative:qlns.api\\controllers\\departmentcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A8365435-84AF-488F-AC0D-1FBEDB57AC92}|QLNS.API\\QLNS.API.csproj|d:\\blazor study\\qlns\\qlns.api\\qlns.api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{A8365435-84AF-488F-AC0D-1FBEDB57AC92}|QLNS.API\\QLNS.API.csproj|solutionrelative:qlns.api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "20260928023311_in.cs",
+              "DocumentMoniker": "D:\\Blazor study\\QLNS\\QLNS.API\\QLNS.Infrastructure\\Data\\migration\\20260928023311_in.cs",
+              "RelativeDocumentMoniker": "QLNS.Infrastructure\\Data\\migration\\20260928023311_in.cs",
+              "ToolTip": "D:\\Blazor study\\QLNS\\QLNS.API\\QLNS.Infrastructure\\Data\\migration\\20260928023311_in.cs",
+              "RelativeToolTip": "QLNS.Infrastructure\\Data\\migration\\20260928023311_in.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-28T02:33:12.042Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Department.cs",
+              "DocumentMoniker": "D:\\Blazor study\\QLNS\\QLNS.API\\QLNS.Core\\Entities\\Department.cs",
+              "RelativeDocumentMoniker": "QLNS.Core\\Entities\\Department.cs",
+              "ToolTip": "D:\\Blazor study\\QLNS\\QLNS.API\\QLNS.Core\\Entities\\Department.cs",
+              "RelativeToolTip": "QLNS.Core\\Entities\\Department.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-30T01:56:09.41Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "BonusPenalty.cs",
+              "DocumentMoniker": "D:\\Blazor study\\QLNS\\QLNS.API\\QLNS.Core\\Entities\\BonusPenalty.cs",
+              "RelativeDocumentMoniker": "QLNS.Core\\Entities\\BonusPenalty.cs",
+              "ToolTip": "D:\\Blazor study\\QLNS\\QLNS.API\\QLNS.Core\\Entities\\BonusPenalty.cs",
+              "RelativeToolTip": "QLNS.Core\\Entities\\BonusPenalty.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-30T01:55:59.69Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Attendance.cs",
+              "DocumentMoniker": "D:\\Blazor study\\QLNS\\QLNS.API\\QLNS.Core\\Entities\\Attendance.cs",
+              "RelativeDocumentMoniker": "QLNS.Core\\Entities\\Attendance.cs",
+              "ToolTip": "D:\\Blazor study\\QLNS\\QLNS.API\\QLNS.Core\\Entities\\Attendance.cs",
+              "RelativeToolTip": "QLNS.Core\\Entities\\Attendance.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-30T01:55:26.11Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "DepartmentService.cs",
+              "DocumentMoniker": "D:\\Blazor study\\QLNS\\QLNS.API\\QLNS.Core\\Services\\DepartmentService.cs",
+              "RelativeDocumentMoniker": "QLNS.Core\\Services\\DepartmentService.cs",
+              "ToolTip": "D:\\Blazor study\\QLNS\\QLNS.API\\QLNS.Core\\Services\\DepartmentService.cs",
+              "RelativeToolTip": "QLNS.Core\\Services\\DepartmentService.cs",
+              "ViewState": "AgIAAD4AAAAAAAAAAAAwwEwAAABrAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-22T06:53:34.103Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "DepartmentController.cs",
+              "DocumentMoniker": "D:\\Blazor study\\QLNS\\QLNS.API\\QLNS.API\\Controllers\\DepartmentController.cs",
+              "RelativeDocumentMoniker": "QLNS.API\\Controllers\\DepartmentController.cs",
+              "ToolTip": "D:\\Blazor study\\QLNS\\QLNS.API\\QLNS.API\\Controllers\\DepartmentController.cs",
+              "RelativeToolTip": "QLNS.API\\Controllers\\DepartmentController.cs",
+              "ViewState": "AgIAABAAAAAAAAAAAAA1wAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-22T06:45:31.205Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "D:\\Blazor study\\QLNS\\QLNS.API\\QLNS.API\\appsettings.json",
+              "RelativeDocumentMoniker": "QLNS.API\\appsettings.json",
+              "ToolTip": "D:\\Blazor study\\QLNS\\QLNS.API\\QLNS.API\\appsettings.json",
+              "RelativeToolTip": "QLNS.API\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-06-11T08:15:03.429Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\Blazor study\\QLNS\\QLNS.API\\QLNS.API\\Program.cs",
+              "RelativeDocumentMoniker": "QLNS.API\\Program.cs",
+              "ToolTip": "D:\\Blazor study\\QLNS\\QLNS.API\\QLNS.API\\Program.cs",
+              "RelativeToolTip": "QLNS.API\\Program.cs",
+              "ViewState": "AgIAADwAAAAAAAAAAAAAAFYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-11T07:31:06.076Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

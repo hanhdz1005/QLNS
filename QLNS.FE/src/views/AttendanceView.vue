@@ -8,19 +8,23 @@ import { employeeApi } from '@/api/employee.api';
 import type { AttendanceDto, AddAttendanceDto, EmployeeDto } from '@/types';
 import { AttendanceStatus } from '@/types';
 import { usePagination } from '@/composables/usePagination';
-import AttendanceQrKiosk from './attendance/components/AttendanceQrKiosk.vue';
+import AttendanceFaceScanner from './attendance/components/AttendanceFaceScanner.vue';
+import FirstTimeFaceModal from './attendance/components/FirstTimeFaceModal.vue';
 import AttendanceRecordsTable from './attendance/components/AttendanceRecordsTable.vue';
 import MyAttendanceTable from './attendance/components/MyAttendanceTable.vue';
 import AttendanceFormModal from './attendance/components/AttendanceFormModal.vue';
 import BasePagination from '@/components/BasePagination.vue';
 import ConfirmModal from '@/components/ConfirmModal.vue';
-import { CalendarCheck2, QrCode, Search, Plus, User } from 'lucide-vue-next';
+import { CalendarCheck2, ScanFace, Search, Plus, User } from 'lucide-vue-next';
 
 const authStore = useAuthStore();
 const toastStore = useToastStore();
 const { t } = useI18n();
 
-const activeTab = ref<'kiosk' | 'records' | 'my-attendance'>('records');
+const activeTab = ref<'kiosk' | 'records' | 'my-attendance'>(
+  authStore.isEmployee ? 'kiosk' : 'records'
+);
+const showUpdateFaceModal = ref(false);
 
 // Pagination & search
 const { pageIndex, pageSize, totalCount, totalPages, setPaginationData, onPageChange, resetPage } = usePagination(10);
@@ -184,8 +188,12 @@ watch(activeTab, (tab) => {
 });
 
 onMounted(async () => {
-  await loadEmployees();
-  fetchRecords();
+  if (authStore.canManagePayroll) {
+    if (authStore.isAdmin) {
+      await loadEmployees();
+    }
+    fetchRecords();
+  }
 });
 </script>
 
@@ -206,6 +214,7 @@ onMounted(async () => {
       <!-- Navigation Tabs -->
       <div class="flex items-center p-1 bg-slate-200/80 rounded-xl text-xs sm:text-sm font-semibold">
         <button
+          v-if="authStore.canManagePayroll"
           @click="activeTab = 'records'"
           :class="[
             'flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all',
@@ -223,8 +232,8 @@ onMounted(async () => {
             activeTab === 'kiosk' ? 'bg-white text-indigo-700 shadow-xs' : 'text-slate-600 hover:text-slate-900',
           ]"
         >
-          <QrCode class="w-4 h-4" />
-          {{ t('l_tab_attendance_kiosk') }}
+          <ScanFace class="w-4 h-4" />
+          {{ t('b_open_face_scanner') }}
         </button>
 
         <button
@@ -283,9 +292,12 @@ onMounted(async () => {
       </div>
     </div>
 
-    <!-- Tab 2: Kiosk Mode -->
-    <div v-else-if="activeTab === 'kiosk'" class="py-6 flex items-center justify-center">
-      <AttendanceQrKiosk @record-updated="fetchRecords" />
+    <!-- Tab 2: Face Recognition Attendance -->
+    <div v-else-if="activeTab === 'kiosk'" class="py-2 flex items-center justify-center">
+      <AttendanceFaceScanner
+        @record-updated="() => { if (authStore.canManagePayroll) fetchRecords(); }"
+        @open-update-face="showUpdateFaceModal = true"
+      />
     </div>
 
     <!-- Tab 3: My Attendance -->
@@ -300,6 +312,12 @@ onMounted(async () => {
     </div>
 
     <!-- Modals -->
+    <FirstTimeFaceModal
+      :show="showUpdateFaceModal"
+      :mandatory="false"
+      @close="showUpdateFaceModal = false"
+    />
+
     <AttendanceFormModal
       v-model="showModal"
       :is-editing="isEditing"

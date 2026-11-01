@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "EX1OPkr1bnk=",
+  "dgSpecHash": "T271fz/2va0=",
   "success": true,
-  "projectFilePath": "D:\\Blazor study\\QLNS\\QLNS.API\\QLNS.Infrastructure\\QLNS.Infrastructure.csproj",
+  "projectFilePath": "D:\\Blazor study\\QLNS\\QLNS\\QLNS.API\\QLNS.Infrastructure\\QLNS.Infrastructure.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\hzkil\\.nuget\\packages\\automapper\\13.0.1\\automapper.13.0.1.nupkg.sha512",
     "C:\\Users\\hzkil\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",

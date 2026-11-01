@@ -1,10 +1,13 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using QLNS.Core.Interfaces.IService;
-using QLNS.Core.Dto;
-using QLNSCore.Entities;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using QLNS.Core.Common;
+using QLNS.Core.Dto;
+using QLNS.Core.Interfaces.IService;
+using QLNSCore.Entities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace QLNS.API.Controllers
 {
@@ -19,7 +22,7 @@ namespace QLNS.API.Controllers
             _departmentService = departmentService;
         }
 
-        [Authorize(Roles ="User, Admin, Leader")]
+        [Authorize(Roles = RoleConstants.AllRoles)]
         [HttpGet]
         public async Task<ActionResult> GetAll()
         {
@@ -31,7 +34,7 @@ namespace QLNS.API.Controllers
             return Ok(Result<ListItems<DepartmentDto>>.Success(data));
         }
 
-        [Authorize(Roles ="User, Admin, Leader")]
+        [Authorize(Roles = RoleConstants.AdminOrAccountant)]
         [HttpGet("filter")]
         public async Task<ActionResult> GetFilter(
             [FromQuery] int pageIndex = 1,
@@ -42,7 +45,7 @@ namespace QLNS.API.Controllers
             return Ok(Result<PagedResult<DepartmentDto>>.Success(data));
         }
 
-        [Authorize(Roles ="User, Admin, Leader")]
+        [Authorize(Roles = RoleConstants.AdminOrAccountant)]
         [HttpGet("{id}")]
         public async Task<ActionResult<Department>> GetDepartmentById(Guid id)
         {
@@ -57,7 +60,7 @@ namespace QLNS.API.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = RoleConstants.Admin)]
         [HttpPost]
         public async Task<ActionResult> AddDepartment(AddDepartmentDto department)
         {
@@ -72,7 +75,7 @@ namespace QLNS.API.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = RoleConstants.Admin)]
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateById(Guid id, AddDepartmentDto department)
         {
@@ -87,7 +90,7 @@ namespace QLNS.API.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = RoleConstants.Admin)]
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteById(Guid id)
         {

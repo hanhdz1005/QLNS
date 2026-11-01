@@ -1,0 +1,12 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\QLNS.API",
+    "\\QLNS.API\\bin",
+    "\\QLNS.API\\bin\\Release",
+    "\\QLNS.API\\Controllers",
+    "\\QLNS.API\\Extension",
+    "\\QLNS.Infrastructure"
+  ],
+  "PreviewInSolutionExplorer": false
+}

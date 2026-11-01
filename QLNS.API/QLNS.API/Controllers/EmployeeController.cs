@@ -24,7 +24,7 @@ namespace QLNS.API.Controllers
             _employeeService = employeeService;
         }
 
-        [Authorize(Roles ="User, Admin, Leader")]
+        [Authorize(Roles = QLNS.Core.Common.RoleConstants.AdminOrAccountant)]
         [HttpGet]
         public async Task<ActionResult> GetAll()
         {
@@ -38,7 +38,7 @@ namespace QLNS.API.Controllers
             return Ok(result);
         }
 
-        [Authorize(Roles ="User, Admin, Leader")]
+        [Authorize(Roles = QLNS.Core.Common.RoleConstants.AdminOrAccountant)]
         [HttpGet("filter")]
         public async Task<ActionResult> GetFilter(
             [FromQuery] int pageIndex = 1,
@@ -50,7 +50,7 @@ namespace QLNS.API.Controllers
         }
 
         // Endpoint xem hồ sơ cá nhân của nhân viên đang đăng nhập (Employee Self-Service)
-        [Authorize(Roles = "User, Admin, Leader")]
+        [Authorize(Roles = QLNS.Core.Common.RoleConstants.AllRoles)]
         [HttpGet("profile/me")]
         public async Task<ActionResult> GetMyProfile()
         {
@@ -70,7 +70,7 @@ namespace QLNS.API.Controllers
             }
         }
 
-        [Authorize(Roles ="User, Admin, Leader")]
+        [Authorize(Roles = QLNS.Core.Common.RoleConstants.AdminOrAccountant)]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetById(Guid id)
         {

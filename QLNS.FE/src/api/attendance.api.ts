@@ -5,6 +5,10 @@ import type {
   ListItems,
   AttendanceDto,
   AddAttendanceDto,
+  FaceRegisterDto,
+  FaceRegisterResultDto,
+  FaceCheckInDto,
+  FaceCheckInResultDto,
   QrTokenDto,
   QrCheckInResultDto,
 } from '@/types';
@@ -39,6 +43,27 @@ export const attendanceApi = {
 
   delete: async (id: string): Promise<ApiResponse<boolean>> => {
     const res = await apiClient.delete<ApiResponse<boolean>>(`/Attendance/${id}`);
+    return res.data;
+  },
+
+  // B1: Đăng ký khuôn mặt lần đầu
+  registerFace: async (dto: FaceRegisterDto): Promise<ApiResponse<FaceRegisterResultDto>> => {
+    const res = await apiClient.post<ApiResponse<FaceRegisterResultDto>>('/Attendance/register-face', dto);
+    return res.data;
+  },
+
+  // B3 & B4: Chụp khuôn mặt gửi về BE đối sánh và chấm công
+  faceCheckIn: async (dto: FaceCheckInDto): Promise<ApiResponse<FaceCheckInResultDto>> => {
+    const res = await apiClient.post<ApiResponse<FaceCheckInResultDto>>('/Attendance/face-checkin', dto);
+    return res.data;
+  },
+
+  // B2 & B4: Báo cáo mã lỗi kết nối Camera về BE
+  reportCameraError: async (errorCode: string, errorDetail?: string): Promise<ApiResponse<unknown>> => {
+    const res = await apiClient.post<ApiResponse<unknown>>('/Attendance/camera-error', {
+      errorCode,
+      errorDetail,
+    });
     return res.data;
   },
 

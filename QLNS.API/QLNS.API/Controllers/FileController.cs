@@ -1,15 +1,18 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
+using QLNS.Core.Common;
 using QLNS.Core.Dto;
 using QLNSCore.Entities;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
 namespace QLNS.API.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = RoleConstants.AllRoles)]
     [Route("api/[controller]")]
     [ApiController]
     public class FileController : ControllerBase
@@ -67,7 +70,7 @@ namespace QLNS.API.Controllers
             if (!Directory.Exists(targetFolder))
                 Directory.CreateDirectory(targetFolder);
 
-            var results = new System.Collections.Generic.List<FileUploadResult>();
+            var results = new List<FileUploadResult>();
 
             foreach (var file in files)
             {
@@ -104,6 +107,7 @@ namespace QLNS.API.Controllers
             return File(fileBytes, contentType, fileName);
         }
 
+        [Authorize(Roles = RoleConstants.Admin)]
         [HttpDelete("{fileName}")]
         public ActionResult Delete(string fileName)
         {
@@ -115,6 +119,4 @@ namespace QLNS.API.Controllers
             return Ok(Result<bool>.Success(true));
         }
     }
-
-    
 }

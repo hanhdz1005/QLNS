@@ -106,42 +106,106 @@ namespace QLNS.Core.Services
             return true;
         }
 
-        // 1. Sinh mã QR động (reset sau 30s)
-        public async Task<(string Token, int ExpiresInSeconds)> GenerateQrTokenAsync()
+        // B1: Đăng ký đặc điểm nhận diện khuôn mặt lần đầu
+        public async Task<(bool Success, string Message, string? ErrorCode, string? ImageUrl)> RegisterFaceAsync(
+            string userIdentifier,
+            FaceRegisterDto dto)
         {
-            var token = Guid.NewGuid().ToString("N") + DateTime.UtcNow.Ticks.ToString("x");
-            var cacheKey = $"QR_ATTENDANCE_{token}";
-            // Lưu cache với TTL 35 giây (30s hiển thị + 5s buffer độ trễ mạng)
-            _cache.Set(cacheKey, true, TimeSpan.FromSeconds(35));
-            return await Task.FromResult((token, 30));
+            if (!FaceRecognitionHelper.IsValidDescriptor(dto.FaceDescriptor))
+            {
+                return (false, "Không trích xuất được đặc điểm khuôn mặt hợp lệ. Vui lòng chụp rõ khuôn mặt.", "FACE_NOT_DETECTED", null);
+            }
+
+            var serializedDescriptor = FaceRecognitionHelper.SerializeDescriptor(dto.FaceDescriptor);
+            var safePrefix = userIdentifier.Replace("@", "_").Replace(".", "_");
+            var imageUrl = await FaceRecognitionHelper.SaveBase64ImageAsync(dto.CapturedImageBase64, "faces", safePrefix);
+
+            var employee = await _uow.EmployeeRepository.GetByIdentifierAsync(userIdentifier);
+            if (employee != null)
+            {
+                employee.FaceEmbedding = serializedDescriptor;
+                employee.FaceImageUrl = imageUrl;
+                employee.FaceRegisteredAt = DateTime.UtcNow;
+                await _uow.EmployeeRepository.UpdateAsync(employee.Id, employee);
+            }
+
+            return (true, "Đăng ký nhận diện khuôn mặt thành công.", null, imageUrl);
         }
 
-        // 2. Điểm danh qua quét mã QR
-        public async Task<QrCheckInResultDto> QrCheckInAsync(string qrToken, string userIdentifier)
+        // B3 & B4: Đối sánh khuôn mặt gửi lên với dữ liệu DB và ghi nhận chấm công
+        public async Task<FaceCheckInResultDto> FaceCheckInAsync(
+            string userIdentifier,
+            FaceCheckInDto dto,
+            string? fallbackUserEmbedding = null)
         {
-            var cacheKey = $"QR_ATTENDANCE_{qrToken}";
-            if (!_cache.TryGetValue(cacheKey, out _))
+            if (!FaceRecognitionHelper.IsValidDescriptor(dto.CapturedFaceDescriptor))
             {
-                return new QrCheckInResultDto
+                return new FaceCheckInResultDto
                 {
                     Success = false,
                     ActionType = "Unknown",
-                    Message = "Mã QR đã hết hạn hoặc không hợp lệ. Vui lòng quét lại mã QR mới nhất hiển thị trên màn hình."
+                    ErrorCode = "FACE_NOT_DETECTED",
+                    Message = "Không phát hiện được khuôn mặt hợp lệ trong khung hình chụp."
                 };
             }
 
             var employee = await _uow.EmployeeRepository.GetByIdentifierAsync(userIdentifier);
-
             if (employee == null)
             {
-                return new QrCheckInResultDto
+                return new FaceCheckInResultDto
                 {
                     Success = false,
                     ActionType = "Unknown",
+                    ErrorCode = "EMPLOYEE_NOT_FOUND",
                     Message = "Không tìm thấy hồ sơ nhân viên tương ứng với tài khoản đăng nhập."
                 };
             }
 
+            var storedEmbeddingJson = !string.IsNullOrWhiteSpace(employee.FaceEmbedding)
+                ? employee.FaceEmbedding
+                : fallbackUserEmbedding;
+
+            var storedDescriptor = FaceRecognitionHelper.DeserializeDescriptor(storedEmbeddingJson);
+            if (storedDescriptor == null || !FaceRecognitionHelper.IsValidDescriptor(storedDescriptor))
+            {
+                return new FaceCheckInResultDto
+                {
+                    Success = false,
+                    ActionType = "Unknown",
+                    ErrorCode = "FACE_NOT_REGISTERED",
+                    Message = "Tài khoản chưa đăng ký dữ liệu khuôn mặt lần đầu trong hệ thống."
+                };
+            }
+
+            var (isMatch, distance, similarityPercent) = FaceRecognitionHelper.VerifyFaceMatch(
+                storedDescriptor,
+                dto.CapturedFaceDescriptor);
+
+            if (!isMatch)
+            {
+                return new FaceCheckInResultDto
+                {
+                    Success = false,
+                    ActionType = "Unknown",
+                    ErrorCode = "FACE_MISMATCH",
+                    SimilarityScore = similarityPercent,
+                    Message = $"Khuôn mặt không khớp với dữ liệu nhận diện gốc (Độ tương đồng: {similarityPercent}%, Khoảng cách: {distance})."
+                };
+            }
+
+            var snapshotUrl = await FaceRecognitionHelper.SaveBase64ImageAsync(
+                dto.CapturedImageBase64,
+                "attendances",
+                employee.Code);
+
+            return await RecordCheckInOrOutAsync(employee, snapshotUrl, similarityPercent);
+        }
+
+        private async Task<FaceCheckInResultDto> RecordCheckInOrOutAsync(
+            Employee employee,
+            string? snapshotUrl,
+            decimal similarityPercent)
+        {
             var today = DateOnly.FromDateTime(DateTime.Today);
             var nowTime = DateTime.Now.TimeOfDay;
             nowTime = new TimeSpan(nowTime.Hours, nowTime.Minutes, nowTime.Seconds);
@@ -151,7 +215,6 @@ namespace QLNS.Core.Services
 
             if (existingAttendance == null)
             {
-                // Điểm danh vào ca làm việc đầu tiên trong ngày
                 var isLate = nowTime > new TimeSpan(8, 30, 0);
                 var attendance = new Attendance
                 {
@@ -162,54 +225,108 @@ namespace QLNS.Core.Services
                     CheckIn = nowTime,
                     CheckOut = null,
                     HoursWorked = 0,
-                    Status = isLate ? AttendanceStatus.Late : AttendanceStatus.Present
+                    Status = isLate ? AttendanceStatus.Late : AttendanceStatus.Present,
+                    FaceSnapshotUrl = snapshotUrl,
+                    SimilarityScore = similarityPercent
                 };
 
                 await _uow.AttendanceRepository.AddAsync(attendance);
 
-                return new QrCheckInResultDto
+                return new FaceCheckInResultDto
                 {
                     Success = true,
                     ActionType = "CheckIn",
-                    Message = isLate 
-                        ? $"Điểm danh VÀO thành công lúc {nowTime:hh\\:mm\\:ss} (Muộn hơn quy định 08:30)." 
-                        : $"Điểm danh VÀO thành công lúc {nowTime:hh\\:mm\\:ss}.",
+                    Message = isLate
+                        ? $"Điểm danh khuôn mặt VÀO thành công lúc {nowTime:hh\\:mm\\:ss} (Muộn hơn 08:30 - Khớp {similarityPercent}%)."
+                        : $"Điểm danh khuôn mặt VÀO thành công lúc {nowTime:hh\\:mm\\:ss} (Khớp {similarityPercent}%).",
                     EmployeeName = employee.FullName,
                     Date = today,
                     Time = nowTime,
-                    HoursWorked = 0
+                    HoursWorked = 0,
+                    SimilarityScore = similarityPercent,
+                    SnapshotUrl = snapshotUrl
                 };
             }
             else
             {
-                // Điểm danh ra về (hoặc cập nhật lần ra mới nhất)
                 existingAttendance.CheckOut = nowTime;
                 if (existingAttendance.CheckIn.HasValue)
                 {
                     var worked = (decimal)(nowTime - existingAttendance.CheckIn.Value).TotalHours;
                     existingAttendance.HoursWorked = worked > 0 ? Math.Round(worked, 2) : 0;
                 }
+                if (!string.IsNullOrEmpty(snapshotUrl))
+                {
+                    existingAttendance.FaceSnapshotUrl = snapshotUrl;
+                }
+                existingAttendance.SimilarityScore = similarityPercent;
 
                 await _uow.AttendanceRepository.UpdateAsync(existingAttendance.Id, existingAttendance);
 
-                return new QrCheckInResultDto
+                return new FaceCheckInResultDto
                 {
                     Success = true,
                     ActionType = "CheckOut",
-                    Message = $"Điểm danh RA thành công lúc {nowTime:hh\\:mm\\:ss}. Tổng thời gian làm việc: {existingAttendance.HoursWorked:F2} giờ.",
+                    Message = $"Điểm danh khuôn mặt RA thành công lúc {nowTime:hh\\:mm\\:ss}. Tổng giờ: {existingAttendance.HoursWorked:F2}h (Khớp {similarityPercent}%).",
                     EmployeeName = employee.FullName,
                     Date = today,
                     Time = nowTime,
-                    HoursWorked = existingAttendance.HoursWorked
+                    HoursWorked = existingAttendance.HoursWorked,
+                    SimilarityScore = similarityPercent,
+                    SnapshotUrl = snapshotUrl
                 };
             }
         }
 
-        // 3. Xem danh sách chấm công của nhân viên đang đăng nhập (Employee Self-Service)
+        // Legacy QR methods
+        public async Task<(string Token, int ExpiresInSeconds)> GenerateQrTokenAsync()
+        {
+            var token = Guid.NewGuid().ToString("N") + DateTime.UtcNow.Ticks.ToString("x");
+            var cacheKey = $"QR_ATTENDANCE_{token}";
+            _cache.Set(cacheKey, true, TimeSpan.FromSeconds(35));
+            return await Task.FromResult((token, 30));
+        }
+
+        public async Task<QrCheckInResultDto> QrCheckInAsync(string qrToken, string userIdentifier)
+        {
+            var cacheKey = $"QR_ATTENDANCE_{qrToken}";
+            if (!_cache.TryGetValue(cacheKey, out _))
+            {
+                return new QrCheckInResultDto
+                {
+                    Success = false,
+                    ActionType = "Unknown",
+                    Message = "Mã QR đã hết hạn hoặc không hợp lệ."
+                };
+            }
+
+            var employee = await _uow.EmployeeRepository.GetByIdentifierAsync(userIdentifier);
+            if (employee == null)
+            {
+                return new QrCheckInResultDto
+                {
+                    Success = false,
+                    ActionType = "Unknown",
+                    Message = "Không tìm thấy hồ sơ nhân viên tương ứng."
+                };
+            }
+
+            var res = await RecordCheckInOrOutAsync(employee, null, 100m);
+            return new QrCheckInResultDto
+            {
+                Success = res.Success,
+                ActionType = res.ActionType,
+                Message = res.Message,
+                EmployeeName = res.EmployeeName,
+                Date = res.Date,
+                Time = res.Time,
+                HoursWorked = res.HoursWorked
+            };
+        }
+
         public async Task<IEnumerable<AttendanceDto>> GetMyAttendanceAsync(string userIdentifier, int month, int year)
         {
             var employee = await _uow.EmployeeRepository.GetByIdentifierAsync(userIdentifier);
-
             if (employee == null)
                 throw new KeyNotFoundException("Không tìm thấy nhân viên.");
 

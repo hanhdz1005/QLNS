@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import ToastContainer from '@/components/ToastContainer.vue';
+import { useAuthStore } from '@/stores/auth';
 import AppSidebar from '@/components/layout/AppSidebar.vue';
 import AppNavbar from '@/components/layout/AppNavbar.vue';
+import FirstTimeFaceModal from '@/views/attendance/components/FirstTimeFaceModal.vue';
 
+const authStore = useAuthStore();
 const isSidebarOpen = ref(true);
 const isMobileSidebarOpen = ref(false);
 
@@ -22,12 +24,12 @@ const closeMobileSidebar = () => {
 
 <template>
   <div class="h-screen bg-slate-50 flex flex-col font-sans text-slate-800 overflow-hidden">
-    <ToastContainer />
+    <FirstTimeFaceModal :show="authStore.needsFaceRegistration" :mandatory="true" />
 
     <!-- Mobile sidebar backdrop -->
     <div
       v-if="isMobileSidebarOpen"
-      class="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-xs lg:hidden"
+      class="fixed inset-0 z-40 bg-slate-900/35 lg:hidden"
       @click="closeMobileSidebar"
     />
 

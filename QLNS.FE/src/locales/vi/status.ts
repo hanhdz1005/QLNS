@@ -45,4 +45,11 @@ export const status = {
   s_bonus: 'Khen thưởng',
   s_penalty: 'Kỷ luật / Phạt',
   s_unknown: 'Không rõ',
+
+  // Core Roles
+  s_role_admin: 'Quản trị viên (Admin)',
+  s_role_accountant: 'Kế toán (Accountant)',
+  s_role_employee: 'Nhân viên (Employee)',
+  l_accountant_access_badge: 'Lương & Tài chính',
+  l_employee_access_badge: 'Nhân viên',
 };

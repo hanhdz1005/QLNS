@@ -1,15 +1,16 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using QLNS.Core.Interfaces.IService;
-using QLNS.Core.Dto;
-using QLNSCore.Entities;
 using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using QLNS.API.Extension;
+using QLNS.Core.Common;
+using QLNS.Core.Dto;
+using QLNS.Core.Interfaces.IService;
+using QLNSCore.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
-using QLNS.API.Extension;
 
 namespace QLNS.API.Controllers
 {
@@ -18,13 +19,15 @@ namespace QLNS.API.Controllers
     public class AttendanceController : ControllerBase
     {
         private readonly IAttendanceService _service;
+        private readonly UserManager<AppUser> _userManager;
 
-        public AttendanceController(IAttendanceService service)
+        public AttendanceController(IAttendanceService service, UserManager<AppUser> userManager)
         {
             _service = service;
+            _userManager = userManager;
         }
 
-        [Authorize(Roles = "User, Admin, Leader")]
+        [Authorize(Roles = RoleConstants.AdminOrAccountant)]
         [HttpGet]
         public async Task<ActionResult> GetAll()
         {
@@ -36,7 +39,7 @@ namespace QLNS.API.Controllers
             return Ok(Result<ListItems<AttendanceDto>>.Success(data));
         }
 
-        [Authorize(Roles = "User, Admin, Leader")]
+        [Authorize(Roles = RoleConstants.AdminOrAccountant)]
         [HttpGet("filter")]
         public async Task<ActionResult> GetFilter(
             [FromQuery] int pageIndex = 1,
@@ -47,7 +50,7 @@ namespace QLNS.API.Controllers
             return Ok(Result<PagedResult<AttendanceDto>>.Success(data));
         }
 
-        [Authorize(Roles = "User, Admin, Leader")]
+        [Authorize(Roles = RoleConstants.AdminOrAccountant)]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetById(Guid id)
         {
@@ -62,7 +65,7 @@ namespace QLNS.API.Controllers
             }
         }
 
-        [Authorize(Roles = "User, Admin, Leader")]
+        [Authorize(Roles = RoleConstants.Admin)]
         [HttpPost]
         public async Task<ActionResult> Add(AddAttendanceDto dto)
         {
@@ -115,7 +118,81 @@ namespace QLNS.API.Controllers
             }
         }
 
-        // Endpoint cho Kiosk/Tablet hiển thị mã QR động (reset mỗi 30s)
+        // B1: Đăng ký đặc điểm nhận diện khuôn mặt lần đầu khi đăng nhập
+        [Authorize(Roles = RoleConstants.AllRoles)]
+        [HttpPost("register-face")]
+        public async Task<ActionResult> RegisterFace([FromBody] FaceRegisterDto dto)
+        {
+            var userIdentifier = User.GetUserIdentifier();
+            if (string.IsNullOrEmpty(userIdentifier))
+                return Unauthorized(Result<string>.Failure("Không xác định được danh tính người dùng.", errorCode: "UNAUTHORIZED"));
+
+            var (success, message, errorCode, imageUrl) = await _service.RegisterFaceAsync(userIdentifier, dto);
+            if (!success)
+            {
+                return BadRequest(Result<string>.Failure(message, errorCode: errorCode ?? "FACE_REGISTER_FAILED"));
+            }
+
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? userIdentifier;
+            var appUser = await _userManager.FindByEmailAsync(email);
+            if (appUser != null)
+            {
+                appUser.FaceEmbedding = FaceRecognitionHelper.SerializeDescriptor(dto.FaceDescriptor);
+                if (!string.IsNullOrEmpty(imageUrl))
+                {
+                    appUser.AvatarUrl = imageUrl;
+                }
+                appUser.FaceRegisteredAt = DateTime.UtcNow;
+                await _userManager.UpdateAsync(appUser);
+            }
+
+            return Ok(Result<object>.Success(new
+            {
+                hasRegisteredFace = true,
+                faceImageUrl = imageUrl
+            }));
+        }
+
+        // B3 & B4: Gửi ảnh/đặc điểm khuôn mặt về BE đối sánh với DB để chấm công
+        [Authorize(Roles = RoleConstants.AllRoles)]
+        [HttpPost("face-checkin")]
+        public async Task<ActionResult> FaceCheckIn([FromBody] FaceCheckInDto dto)
+        {
+            var userIdentifier = User.GetUserIdentifier();
+            if (string.IsNullOrEmpty(userIdentifier))
+                return Unauthorized(Result<string>.Failure("Không xác định được danh tính người dùng đăng nhập.", errorCode: "UNAUTHORIZED"));
+
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? userIdentifier;
+            var appUser = await _userManager.FindByEmailAsync(email);
+
+            var result = await _service.FaceCheckInAsync(userIdentifier, dto, appUser?.FaceEmbedding);
+            if (!result.Success)
+            {
+                return BadRequest(Result<FaceCheckInResultDto>.Failure(
+                    result.Message,
+                    errorCode: result.ErrorCode ?? "FACE_MISMATCH"));
+            }
+
+            return Ok(Result<FaceCheckInResultDto>.Success(result));
+        }
+
+        // B2 & B4: Ghi nhận và trả về Error Code khi kết nối Camera thất bại
+        [Authorize(Roles = RoleConstants.AllRoles)]
+        [HttpPost("camera-error")]
+        public ActionResult ReportCameraError([FromBody] CameraErrorReportDto dto)
+        {
+            var code = string.IsNullOrWhiteSpace(dto?.ErrorCode) ? "CAMERA_CONNECT_FAILED" : dto.ErrorCode;
+            var detail = string.IsNullOrWhiteSpace(dto?.ErrorDetail)
+                ? "Không thể kết nối với thiết bị Camera của người dùng."
+                : dto.ErrorDetail;
+
+            return BadRequest(Result<object>.Failure(
+                message: detail,
+                errors: new List<string> { $"Camera Error [{code}]: {detail}" },
+                errorCode: code));
+        }
+
+        // Legacy QR Endpoints
         [AllowAnonymous]
         [HttpGet("qr-token")]
         public async Task<ActionResult> GetQrToken()
@@ -129,13 +206,11 @@ namespace QLNS.API.Controllers
             }));
         }
 
-        // Endpoint cho nhân viên quét mã QR trên điện thoại để điểm danh Vào/Ra
-        [Authorize(Roles = "User, Admin, Leader")]
+        [Authorize(Roles = RoleConstants.AllRoles)]
         [HttpPost("qr-checkin")]
         public async Task<ActionResult> QrCheckIn([FromBody] QrCheckInDto dto)
         {
             var userIdentifier = User.GetUserIdentifier();
-
             if (string.IsNullOrEmpty(userIdentifier))
                 return Unauthorized(Result<string>.Failure("Không xác định được danh tính người dùng đăng nhập.", errorCode: "UNAUTHORIZED"));
 
@@ -148,8 +223,7 @@ namespace QLNS.API.Controllers
             return Ok(Result<QrCheckInResultDto>.Success(result));
         }
 
-        // Endpoint xem bảng chấm công cá nhân của nhân viên (Employee Self-Service)
-        [Authorize(Roles = "User, Admin, Leader")]
+        [Authorize(Roles = RoleConstants.AllRoles)]
         [HttpGet("my-attendance")]
         public async Task<ActionResult> GetMyAttendance([FromQuery] int? month = null, [FromQuery] int? year = null)
         {
@@ -158,7 +232,6 @@ namespace QLNS.API.Controllers
             var targetYear = year ?? now.Year;
 
             var userIdentifier = User.GetUserIdentifier();
-
             if (string.IsNullOrEmpty(userIdentifier))
                 return Unauthorized(Result<string>.Failure("Không xác định được danh tính người dùng.", errorCode: "UNAUTHORIZED"));
 

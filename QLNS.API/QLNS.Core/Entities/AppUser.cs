@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using QLNSCore.Entities;
 
 namespace QLNSCore.Entities
@@ -9,6 +9,8 @@ namespace QLNSCore.Entities
         public string Role { get; set; }
         public string Code { get; set; }
         public string? AvatarUrl { get; set; }
+        public string? FaceEmbedding { get; set; }
+        public System.DateTime? FaceRegisteredAt { get; set; }
         public string? RefreshToken { get; set; }
         public System.DateTime? RefreshTokenExpiry { get; set; }
     }

@@ -84,7 +84,7 @@ const { t } = useI18n();
 
           <!-- Hours Worked -->
           <td class="py-3 px-4 font-mono font-semibold text-slate-800">
-            {{ att.hoursWorked ? `${att.hoursWorked}h` : '—' }}
+            {{ att.hoursWorked !== null && att.hoursWorked !== undefined ? `${att.hoursWorked}h` : '—' }}
           </td>
 
           <!-- Status -->

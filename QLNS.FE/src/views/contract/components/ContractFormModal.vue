@@ -6,6 +6,7 @@ import { useI18n } from '@/locales';
 import type { AddContractDto, EmployeeDto } from '@/types';
 import { ContractType, ContractStatus } from '@/types';
 import BaseModal from '@/components/BaseModal.vue';
+import { ExternalLink } from 'lucide-vue-next';
 
 const props = defineProps<{
   modelValue: boolean;
@@ -32,7 +33,7 @@ const handleFileUpload = async (e: Event) => {
 
   uploadLoading.value = true;
   try {
-    const res = await fileApi.upload(file);
+    const res = await fileApi.upload(file, 'contracts');
     if (res.isSuccess && res.data) {
       props.formData.attachmentUrl = res.data.url;
       toastStore.success(t('t_file_upload_success'));
@@ -158,12 +159,20 @@ const handleFileUpload = async (e: Event) => {
 
         <div>
           <label class="block font-semibold text-slate-700 mb-1">{{ t('l_upload_contract_scan') }}</label>
-          <div class="flex items-center gap-2">
+          <div class="flex flex-col gap-1.5">
             <input
               type="file"
               @change="handleFileUpload"
               class="text-xs file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:text-indigo-700 file:font-semibold hover:file:bg-indigo-100"
             />
+            <a
+              v-if="formData.attachmentUrl"
+              :href="formData.attachmentUrl"
+              target="_blank"
+              class="inline-flex items-center gap-1.5 text-indigo-600 hover:text-indigo-800 hover:underline font-medium text-xs"
+            >
+              <ExternalLink class="w-3.5 h-3.5" /> {{ t('b_download_scan') }}
+            </a>
           </div>
         </div>
       </div>

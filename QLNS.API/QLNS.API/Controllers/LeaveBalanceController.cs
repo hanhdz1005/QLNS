@@ -22,7 +22,7 @@ namespace QLNS.API.Controllers
         }
 
         // Endpoint xem số ngày phép còn lại của nhân viên đang đăng nhập (Employee Self-Service)
-        [Authorize(Roles = "User, Admin, Leader")]
+        [Authorize(Roles = QLNS.Core.Common.RoleConstants.AllRoles)]
         [HttpGet("my-balance")]
         public async Task<ActionResult> GetMyBalance([FromQuery] int? year = null)
         {
@@ -43,8 +43,8 @@ namespace QLNS.API.Controllers
             }
         }
 
-        // Endpoint tra cứu phép năm của nhân viên theo Id (HR / Quản lý)
-        [Authorize(Roles = "Admin, Leader")]
+        // Endpoint tra cứu phép năm của nhân viên theo Id (HR / Kế toán)
+        [Authorize(Roles = QLNS.Core.Common.RoleConstants.AdminOrAccountant)]
         [HttpGet("employee/{employeeId}")]
         public async Task<ActionResult> GetByEmployeeId(Guid employeeId, [FromQuery] int? year = null)
         {

@@ -53,7 +53,8 @@ const search = ref('');
 const fetchRequests = async () => {
   loading.value = true;
   try {
-    const res = await leaveApi.getFilterRequests(pageIndex.value, pageSize.value, search.value.trim());
+    const myOnly = activeTab.value === 'my';
+    const res = await leaveApi.getFilterRequests(pageIndex.value, pageSize.value, search.value.trim(), myOnly);
     if (res.isSuccess && res.data) {
       requests.value = res.data.items || [];
       setPaginationData(res.data.totalCount, res.data.totalPages);
@@ -70,7 +71,7 @@ const pendingApprovals = ref<LeaveRequestDto[]>([]);
 const pendingLoading = ref(false);
 
 const fetchPendingApprovals = async () => {
-  if (!authStore.isAdmin && !authStore.isLeader) return;
+  if (!authStore.isAdmin) return;
   pendingLoading.value = true;
   try {
     const res = await leaveApi.getPendingApprovals(1, 20);
@@ -127,12 +128,19 @@ const requestForm = reactive<AddLeaveRequestDto>({
 
 const loadEmployees = async () => {
   try {
-    const res = await employeeApi.getAll();
-    if (res.isSuccess && res.data?.items) {
-      employees.value = res.data.items;
-      if (employees.value.length > 0 && employees.value[0] && !requestForm.employeeId) {
-        requestForm.employeeId = employees.value[0].id;
+    if (authStore.isAdmin) {
+      const res = await employeeApi.getAll();
+      if (res.isSuccess && res.data?.items) {
+        employees.value = res.data.items;
       }
+    } else {
+      const res = await employeeApi.getProfileMe();
+      if (res.isSuccess && res.data) {
+        employees.value = [res.data];
+      }
+    }
+    if (employees.value.length > 0 && employees.value[0] && !requestForm.employeeId) {
+      requestForm.employeeId = employees.value[0].id;
     }
   } catch {
     // ignore
@@ -222,7 +230,7 @@ watch(activeTab, (tab) => {
 onMounted(() => {
   loadMyBalance();
   fetchRequests();
-  if (authStore.isAdmin || authStore.isLeader) {
+  if (authStore.isAdmin) {
     fetchPendingApprovals();
   }
 });
@@ -280,7 +288,7 @@ onMounted(() => {
         </button>
 
         <button
-          v-if="authStore.isAdmin || authStore.isLeader"
+          v-if="authStore.isAdmin"
           @click="activeTab = 'approvals'"
           :class="[
             'flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all',
@@ -292,7 +300,7 @@ onMounted(() => {
         </button>
 
         <button
-          v-if="authStore.isAdmin"
+          v-if="authStore.canManagePayroll"
           @click="activeTab = 'all'"
           :class="[
             'flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all',

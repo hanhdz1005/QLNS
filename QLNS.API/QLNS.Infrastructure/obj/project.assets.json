@@ -5180,11 +5180,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Blazor study\\QLNS\\QLNS.API\\QLNS.Infrastructure\\QLNS.Infrastructure.csproj",
+      "projectUniqueName": "D:\\Blazor study\\QLNS\\QLNS\\QLNS.API\\QLNS.Infrastructure\\QLNS.Infrastructure.csproj",
       "projectName": "QLNS.Infrastructure",
-      "projectPath": "D:\\Blazor study\\QLNS\\QLNS.API\\QLNS.Infrastructure\\QLNS.Infrastructure.csproj",
+      "projectPath": "D:\\Blazor study\\QLNS\\QLNS\\QLNS.API\\QLNS.Infrastructure\\QLNS.Infrastructure.csproj",
       "packagesPath": "C:\\Users\\hzkil\\.nuget\\packages\\",
-      "outputPath": "D:\\Blazor study\\QLNS\\QLNS.API\\QLNS.Infrastructure\\obj\\",
+      "outputPath": "D:\\Blazor study\\QLNS\\QLNS\\QLNS.API\\QLNS.Infrastructure\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "D:\\Visual Studio\\Tools\\NuGetPackages"
@@ -5207,8 +5207,8 @@
           "framework": "net8.0",
           "targetAlias": "net8.0",
           "projectReferences": {
-            "D:\\Blazor study\\QLNS\\QLNS.API\\QLNS.Core\\QLNS.Core.csproj": {
-              "projectPath": "D:\\Blazor study\\QLNS\\QLNS.API\\QLNS.Core\\QLNS.Core.csproj"
+            "D:\\Blazor study\\QLNS\\QLNS\\QLNS.API\\QLNS.Core\\QLNS.Core.csproj": {
+              "projectPath": "D:\\Blazor study\\QLNS\\QLNS\\QLNS.API\\QLNS.Core\\QLNS.Core.csproj"
             }
           }
         }

@@ -1,9 +1,14 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using QLNS.Core.Interfaces.IService;
-using QLNS.Core.Dto;
-using QLNSCore.Entities;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using QLNS.API.Extension;
+using QLNS.Core.Common;
+using QLNS.Core.Dto;
+using QLNS.Core.Interfaces.IService;
+using QLNSCore.Entities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace QLNS.API.Controllers
 {
@@ -18,7 +23,7 @@ namespace QLNS.API.Controllers
             _service = service;
         }
 
-        [Authorize(Roles ="User, Admin, Leader")]
+        [Authorize(Roles = RoleConstants.AdminOrAccountant)]
         [HttpGet]
         public async Task<ActionResult> GetAll()
         {
@@ -30,18 +35,24 @@ namespace QLNS.API.Controllers
             return Ok(Result<ListItems<LeaveRequestDto>>.Success(data));
         }
 
-        [Authorize(Roles ="User, Admin, Leader")]
+        [Authorize(Roles = RoleConstants.AllRoles)]
         [HttpGet("filter")]
         public async Task<ActionResult> GetFilter(
             [FromQuery] int pageIndex = 1,
             [FromQuery] int pageSize = 5,
-            [FromQuery] string? search = null)
+            [FromQuery] string? search = null,
+            [FromQuery] bool myOnly = false)
         {
-            var data = await _service.GetFilterAsync(pageIndex, pageSize, search);
+            var isEmployeeOnly = User.IsInRole(RoleConstants.Employee)
+                && !User.IsInRole(RoleConstants.Admin)
+                && !User.IsInRole(RoleConstants.Accountant);
+
+            var filterIdentifier = (myOnly || isEmployeeOnly) ? User.GetUserIdentifier() : null;
+            var data = await _service.GetFilterAsync(pageIndex, pageSize, search, filterIdentifier);
             return Ok(Result<PagedResult<LeaveRequestDto>>.Success(data));
         }
 
-        [Authorize(Roles ="User, Admin, Leader")]
+        [Authorize(Roles = RoleConstants.AllRoles)]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetById(Guid id)
         {
@@ -57,7 +68,7 @@ namespace QLNS.API.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles ="User, Admin, Leader")]
+        [Authorize(Roles = RoleConstants.AllRoles)]
         public async Task<ActionResult> Add(AddLeaveRequestDto dto)
         {
             try
@@ -80,7 +91,7 @@ namespace QLNS.API.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = RoleConstants.Admin)]
         [HttpPut("{id}")]
         public async Task<ActionResult> Update(Guid id, AddLeaveRequestDto dto)
         {
@@ -95,7 +106,7 @@ namespace QLNS.API.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = RoleConstants.Admin)]
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(Guid id)
         {

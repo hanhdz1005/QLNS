@@ -47,6 +47,11 @@ namespace QLNSCore.Entities
         public Employee? Manager { get; set; }
         public ICollection<Employee> Subordinates { get; set; } = new List<Employee>();
 
+        // Dữ liệu nhận diện khuôn mặt (Face Recognition)
+        public string? FaceEmbedding { get; set; }
+        public string? FaceImageUrl { get; set; }
+        public DateTime? FaceRegisteredAt { get; set; }
+
         // Navigation collections
         public ICollection<Salary> Salaries { get; set; } = new List<Salary>();
         public ICollection<Attendance> Attendances { get; set; } = new List<Attendance>();

@@ -1,16 +1,14 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using QLNS.Core.Dto;
+using QLNS.Core.Common;
 using QLNS.Core.Interfaces.IService;
-using QLNSCore.Entities;
 using System;
-using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace QLNS.API.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = RoleConstants.AdminOrAccountant)]
     [Route("api/[controller]")]
     [ApiController]
     public class ExportController : ControllerBase

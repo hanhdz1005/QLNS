@@ -1,12 +1,17 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using QLNS.Core.Common;
 using QLNS.Core.Dto;
 using QLNS.Core.Interfaces.IService;
 using QLNSCore.Entities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace QLNS.API.Controllers
 {
+    [Authorize(Roles = RoleConstants.AdminOrAccountant)]
     [Route("api/[controller]")]
     [ApiController]
     public class SalaryController : ControllerBase
@@ -18,7 +23,6 @@ namespace QLNS.API.Controllers
             _service = service;
         }
 
-        [Authorize(Roles = "User, Admin, Leader")]
         [HttpGet]
         public async Task<ActionResult> GetAll()
         {
@@ -30,7 +34,6 @@ namespace QLNS.API.Controllers
             return Ok(Result<ListItems<SalariesDto>>.Success(data));
         }
 
-        [Authorize(Roles = "User, Admin, Leader")]
         [HttpGet("filter")]
         public async Task<ActionResult> GetFilter(
             [FromQuery] int pageIndex = 1,
@@ -41,7 +44,6 @@ namespace QLNS.API.Controllers
             return Ok(Result<PagedResult<SalariesDto>>.Success(data));
         }
 
-        [Authorize(Roles = "User, Admin, Leader")]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetById(Guid id)
         {
@@ -56,7 +58,6 @@ namespace QLNS.API.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult> Add(AddSalariesDto dto)
         {
@@ -79,7 +80,6 @@ namespace QLNS.API.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<ActionResult> Update(Guid id, AddSalariesDto dto)
         {
@@ -94,7 +94,6 @@ namespace QLNS.API.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(Guid id)
         {

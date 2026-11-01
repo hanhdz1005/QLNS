@@ -9,6 +9,8 @@ export interface AttendanceDto {
   checkOut?: string;
   hoursWorked?: number;
   status: AttendanceStatus;
+  faceSnapshotUrl?: string | null;
+  similarityScore?: number | null;
 }
 
 export interface AddAttendanceDto {
@@ -17,6 +19,40 @@ export interface AddAttendanceDto {
   checkIn?: string;
   checkOut?: string;
   status: AttendanceStatus;
+}
+
+export type CameraErrorCode =
+  | 'CAMERA_PERMISSION_DENIED'
+  | 'CAMERA_NOT_FOUND'
+  | 'CAMERA_IN_USE'
+  | 'CAMERA_CONNECT_FAILED';
+
+export interface FaceRegisterDto {
+  capturedImageBase64: string;
+  faceDescriptor: number[];
+}
+
+export interface FaceRegisterResultDto {
+  hasRegisteredFace: boolean;
+  faceImageUrl?: string | null;
+}
+
+export interface FaceCheckInDto {
+  capturedImageBase64: string;
+  capturedFaceDescriptor: number[];
+}
+
+export interface FaceCheckInResultDto {
+  success: boolean;
+  actionType: string;
+  message: string;
+  errorCode?: string | null;
+  employeeName: string;
+  date: string;
+  time: string;
+  hoursWorked?: number;
+  similarityScore?: number;
+  snapshotUrl?: string | null;
 }
 
 export interface QrTokenDto {

@@ -98,7 +98,7 @@ const { t } = useI18n();
                 <span v-else class="text-slate-400">—</span>
               </td>
               <td class="py-3 px-4 font-mono font-semibold text-slate-800">
-                {{ att.hoursWorked ? `${att.hoursWorked} ${t('l_hours_unit')}` : '—' }}
+                {{ att.hoursWorked !== null && att.hoursWorked !== undefined ? `${att.hoursWorked} ${t('l_hours_unit')}` : '—' }}
               </td>
               <td class="py-3 px-4">
                 <StatusBadge type="attendance" :value="att.status" />

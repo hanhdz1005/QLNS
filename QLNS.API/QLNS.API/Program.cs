@@ -5,7 +5,6 @@ using QLNS.Core.Interfaces;
 using QLNS.Core.Dto;
 using QLNSCore.Entities;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers()
@@ -15,7 +14,6 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
     });
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 builder.Services.InfrastructureConfiguration(builder.Configuration);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -34,7 +32,6 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("Asset.Delete",
         policy => policy.RequireClaim("permission", "ASSET.DELETE"));
 });
-
 
 // Swagger JWT
 builder.Services.AddSwaggerGen(c =>
@@ -81,7 +78,6 @@ builder.Services.AddCors(options =>
         });
 });
 
-
 var app = builder.Build();
 
 app.UseMiddleware<QLNS.API.Middleware.GlobalExceptionHandler>();
@@ -89,21 +85,26 @@ app.UseMiddleware<QLNS.API.Middleware.GlobalExceptionHandler>();
 app.UseCors("AllowAll");
 await InfrastructureRequistration.InfrastructureConfigMiddleware(app);
 
-if (app.Environment.IsDevelopment())
+// Always enable Swagger & SwaggerUI
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "QLNS API v1");
+    c.RoutePrefix = "swagger";
+});
 
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
 
+app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseStaticFiles();
+
+// Automatically redirect root URL to /swagger
+app.MapGet("/", () => Results.Redirect("/swagger"));
 
 app.MapControllers();
 app.Run();

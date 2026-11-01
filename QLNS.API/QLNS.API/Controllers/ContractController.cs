@@ -21,7 +21,7 @@ namespace QLNS.API.Controllers
             _contractService = contractService;
         }
 
-        [Authorize(Roles = "Admin, Leader")]
+        [Authorize(Roles = QLNS.Core.Common.RoleConstants.AdminOrAccountant)]
         [HttpGet]
         public async Task<ActionResult> GetAll()
         {
@@ -33,7 +33,7 @@ namespace QLNS.API.Controllers
             return Ok(Result<ListItems<ContractDto>>.Success(data));
         }
 
-        [Authorize(Roles = "Admin, Leader")]
+        [Authorize(Roles = QLNS.Core.Common.RoleConstants.AdminOrAccountant)]
         [HttpGet("filter")]
         public async Task<ActionResult> GetFilter(
             [FromQuery] int pageIndex = 1,
@@ -44,7 +44,7 @@ namespace QLNS.API.Controllers
             return Ok(Result<PagedResult<ContractDto>>.Success(data));
         }
 
-        [Authorize(Roles = "Admin, Leader")]
+        [Authorize(Roles = QLNS.Core.Common.RoleConstants.AdminOrAccountant)]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetById(Guid id)
         {
@@ -59,7 +59,7 @@ namespace QLNS.API.Controllers
             }
         }
 
-        [Authorize(Roles = "User, Admin, Leader")]
+        [Authorize(Roles = QLNS.Core.Common.RoleConstants.AllRoles)]
         [HttpGet("employee/{employeeId}")]
         public async Task<ActionResult> GetByEmployeeId(Guid employeeId)
         {
@@ -67,7 +67,7 @@ namespace QLNS.API.Controllers
             return Ok(Result<IEnumerable<ContractDto>>.Success(items));
         }
 
-        [Authorize(Roles = "Admin, Leader")]
+        [Authorize(Roles = QLNS.Core.Common.RoleConstants.AdminOrAccountant)]
         [HttpGet("expiring")]
         public async Task<ActionResult> GetExpiring([FromQuery] int days = 30)
         {

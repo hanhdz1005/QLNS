@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore, type AppRole } from '@/stores/auth';
 import { useI18n } from '@/locales';
 import {
   LayoutDashboard,
@@ -16,6 +16,7 @@ import {
   BarChart3,
   ShieldAlert,
   Sliders,
+  UserCircle,
   X,
 } from 'lucide-vue-next';
 
@@ -32,19 +33,40 @@ const route = useRoute();
 const authStore = useAuthStore();
 const { t } = useI18n();
 
-const navigation = computed(() => [
-  { name: t('n_dashboard'), path: '/', icon: LayoutDashboard },
-  { name: t('n_employees'), path: '/employees', icon: Users },
-  { name: t('n_departments'), path: '/departments', icon: Building2 },
-  { name: t('n_positions'), path: '/positions', icon: Briefcase },
-  { name: t('n_contracts'), path: '/contracts', icon: FileText },
-  { name: t('n_attendance'), path: '/attendance', icon: CalendarCheck2 },
-  { name: t('n_leaves'), path: '/leaves', icon: CalendarOff },
-  { name: t('n_payroll'), path: '/payroll', icon: DollarSign },
-  { name: t('n_salaries'), path: '/salaries', icon: Sliders },
-  { name: t('n_bonus_penalty'), path: '/bonus-penalty', icon: Award },
-  { name: t('n_reports'), path: '/reports', icon: BarChart3 },
-]);
+const roleLabel = computed(() => {
+  if (authStore.isAdmin) return t('s_role_admin');
+  if (authStore.isAccountant) return t('s_role_accountant');
+  return t('s_role_employee');
+});
+
+const navigation = computed(() => {
+  const items: Array<{
+    name: string;
+    path: string;
+    icon: unknown;
+    roles: AppRole[];
+  }> = [
+    { name: t('n_dashboard'), path: '/', icon: LayoutDashboard, roles: ['Admin', 'Accountant', 'Employee'] },
+    { name: t('n_employees'), path: '/employees', icon: Users, roles: ['Admin', 'Accountant'] },
+    { name: t('n_departments'), path: '/departments', icon: Building2, roles: ['Admin', 'Accountant'] },
+    { name: t('n_positions'), path: '/positions', icon: Briefcase, roles: ['Admin', 'Accountant'] },
+    { name: t('n_contracts'), path: '/contracts', icon: FileText, roles: ['Admin', 'Accountant'] },
+    { name: t('n_attendance'), path: '/attendance', icon: CalendarCheck2, roles: ['Admin', 'Accountant', 'Employee'] },
+    { name: t('n_leaves'), path: '/leaves', icon: CalendarOff, roles: ['Admin', 'Accountant', 'Employee'] },
+    {
+      name: authStore.isEmployee ? t('n_my_payslip') : t('n_payroll'),
+      path: '/payroll',
+      icon: DollarSign,
+      roles: ['Admin', 'Accountant', 'Employee'],
+    },
+    { name: t('n_salaries'), path: '/salaries', icon: Sliders, roles: ['Admin', 'Accountant'] },
+    { name: t('n_bonus_penalty'), path: '/bonus-penalty', icon: Award, roles: ['Admin', 'Accountant'] },
+    { name: t('n_reports'), path: '/reports', icon: BarChart3, roles: ['Admin', 'Accountant'] },
+    { name: t('n_profile'), path: '/profile', icon: UserCircle, roles: ['Employee'] },
+  ];
+
+  return items.filter((item) => authStore.hasAnyRole(item.roles));
+});
 </script>
 
 <template>
@@ -145,8 +167,8 @@ const navigation = computed(() => [
           <span class="text-sm font-medium text-slate-200 truncate">
             {{ authStore.user?.displayName || t('l_default_user') }}
           </span>
-          <span class="text-[11px] text-slate-500 truncate">
-            {{ t('l_role') }}: {{ authStore.user?.role || 'User' }}
+          <span class="text-[11px] text-slate-400 truncate">
+            {{ roleLabel }}
           </span>
         </div>
       </router-link>

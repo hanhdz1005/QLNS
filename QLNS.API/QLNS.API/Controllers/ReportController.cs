@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using QLNS.Core.Common;
 using QLNS.Core.Dto;
 using QLNS.Core.Interfaces.IService;
 using QLNSCore.Entities;
@@ -8,7 +9,6 @@ using System.Threading.Tasks;
 
 namespace QLNS.API.Controllers
 {
-    [Authorize(Roles = "Admin, Leader")]
     [Route("api/[controller]")]
     [ApiController]
     public class ReportController : ControllerBase
@@ -20,6 +20,7 @@ namespace QLNS.API.Controllers
             _service = service;
         }
 
+        [Authorize(Roles = RoleConstants.AllRoles)]
         [HttpGet("dashboard")]
         public async Task<ActionResult> GetDashboard()
         {
@@ -27,6 +28,7 @@ namespace QLNS.API.Controllers
             return Ok(Result<DashboardDto>.Success(data));
         }
 
+        [Authorize(Roles = RoleConstants.AllRoles)]
         [HttpGet("employee-stats")]
         public async Task<ActionResult> GetEmployeeStatsByDepartment()
         {
@@ -35,8 +37,9 @@ namespace QLNS.API.Controllers
             return Ok(Result<ListItems<EmployeeStatsDto>>.Success(data));
         }
 
+        [Authorize(Roles = RoleConstants.AdminOrAccountant)]
         [HttpGet("leave-report")]
-        public async Task<ActionResult> GetLeaveReport(     
+        public async Task<ActionResult> GetLeaveReport(
             [FromQuery] DateOnly fromDate,
             [FromQuery] DateOnly toDate)
         {
@@ -44,6 +47,7 @@ namespace QLNS.API.Controllers
             return Ok(Result<LeaveReportDto>.Success(data));
         }
 
+        [Authorize(Roles = RoleConstants.AdminOrAccountant)]
         [HttpGet("salary-report")]
         public async Task<ActionResult> GetSalaryReport(
             [FromQuery] int month,
@@ -53,7 +57,7 @@ namespace QLNS.API.Controllers
             return Ok(Result<SalaryReportDto>.Success(data));
         }
 
-        // Endpoint cảnh báo nhân sự: hợp đồng sắp hết hạn, sinh nhật trong tháng, sắp hết thời gian thử việc
+        [Authorize(Roles = RoleConstants.AdminOrAccountant)]
         [HttpGet("hr-alerts")]
         public async Task<ActionResult> GetHrAlerts()
         {

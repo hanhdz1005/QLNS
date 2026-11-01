@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth';
 import { useI18n } from '@/locales';
-import { ShieldCheck, QrCode, PlusCircle, Download } from 'lucide-vue-next';
+import { ShieldCheck, ScanFace, PlusCircle, Download } from 'lucide-vue-next';
 
 defineProps<{
   exportLoading: boolean;
@@ -24,7 +24,7 @@ const { t } = useI18n();
           {{ t('l_enterprise_hrms') }}
         </div>
         <h1 class="text-xl sm:text-2xl font-bold tracking-tight">
-          {{ t('l_greeting') }}, {{ authStore.user?.displayName || t('l_admin') }}! 👋
+          {{ t('l_greeting') }}, {{ authStore.user?.displayName || t('l_default_user') }}!
         </h1>
       </div>
       <p class="text-indigo-100 text-xs sm:text-sm mt-1 max-w-xl hidden sm:block">
@@ -38,8 +38,8 @@ const { t } = useI18n();
         to="/attendance"
         class="inline-flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 bg-white text-indigo-700 hover:bg-indigo-50 font-semibold text-xs sm:text-sm rounded-xl shadow-xs transition-all"
       >
-        <QrCode class="w-4 h-4" />
-        {{ t('b_open_qr_kiosk') }}
+        <ScanFace class="w-4 h-4" />
+        {{ t('b_open_face_scanner') }}
       </router-link>
 
       <router-link
@@ -52,6 +52,7 @@ const { t } = useI18n();
       </router-link>
 
       <button
+        v-if="authStore.canManagePayroll"
         @click="emit('exportEmployees')"
         :disabled="exportLoading"
         class="inline-flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm rounded-xl border border-white/20 transition-all"

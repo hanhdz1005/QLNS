@@ -22,7 +22,7 @@ namespace QLNS.API.Controllers
             _service = service;
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = QLNS.Core.Common.RoleConstants.AdminOrAccountant)]
         [HttpGet]
         public async Task<ActionResult> GetAll([FromQuery] int month, [FromQuery] int year)
         {
@@ -34,7 +34,7 @@ namespace QLNS.API.Controllers
             return Ok(Result<ListItems<PayrollDto>>.Success(data));
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = QLNS.Core.Common.RoleConstants.AdminOrAccountant)]
         [HttpGet("generate")]
         public async Task<ActionResult> GeneratePayroll(
             [FromQuery] Guid employeeId,
@@ -53,7 +53,7 @@ namespace QLNS.API.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = QLNS.Core.Common.RoleConstants.AdminOrAccountant)]
         [HttpPost("generate-bulk")]
         public async Task<ActionResult> GenerateBulkPayroll([FromBody] PayrollGenerateDto dto)
         {
@@ -66,7 +66,7 @@ namespace QLNS.API.Controllers
         }
 
         // Endpoint xem phiếu lương cá nhân của nhân viên (Employee Self-Service)
-        [Authorize(Roles = "User, Admin, Leader")]
+        [Authorize(Roles = QLNS.Core.Common.RoleConstants.AllRoles)]
         [HttpGet("my-payslip")]
         public async Task<ActionResult> GetMyPayslip([FromQuery] int? month = null, [FromQuery] int? year = null)
         {

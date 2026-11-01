@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -18,6 +18,9 @@ namespace QLNSCore.Entities
         [Column(TypeName = "decimal(5,2)")]
         public decimal? HoursWorked { get; set; }
         public AttendanceStatus Status { get; set; }
+        public string? FaceSnapshotUrl { get; set; }
+        [Column(TypeName = "decimal(5,2)")]
+        public decimal? SimilarityScore { get; set; }
     }
 
     public enum AttendanceStatus
@@ -29,5 +32,4 @@ namespace QLNSCore.Entities
         WorkFromHome = 5,
         Leave = 6,
     }
-
 }

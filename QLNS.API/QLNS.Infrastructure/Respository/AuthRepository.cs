@@ -40,7 +40,7 @@ namespace QLNS.Infrastructure.Respository
                 DisplayName = displayName,
                 UserName = userName,
                 Email = email,
-                Role = "User",
+                Role = QLNS.Core.Common.RoleConstants.Employee,
                 Code = userName.ToUpper()
             };
 
@@ -51,7 +51,11 @@ namespace QLNS.Infrastructure.Respository
                 throw new InvalidOperationException(string.Join(", ", errors));
             }
 
-            await _userManager.AddToRoleAsync(user, "User");
+            if (!await _roleManager.RoleExistsAsync(QLNS.Core.Common.RoleConstants.Employee))
+            {
+                await _roleManager.CreateAsync(new IdentityRole(QLNS.Core.Common.RoleConstants.Employee));
+            }
+            await _userManager.AddToRoleAsync(user, QLNS.Core.Common.RoleConstants.Employee);
 
             var accessToken = _tokenRepository.CreateToken(user);
             var refreshToken = _tokenRepository.GenerateRefreshToken();

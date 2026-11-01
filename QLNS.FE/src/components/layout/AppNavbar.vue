@@ -7,7 +7,7 @@ import { reportApi } from '@/api/report.api';
 import type { HrAlertsDto } from '@/types';
 import {
   Menu,
-  QrCode,
+  ScanFace,
   Bell,
   ChevronDown,
   User,
@@ -44,8 +44,14 @@ const totalAlertsCount = computed(() => {
   );
 });
 
+const roleLabel = computed(() => {
+  if (authStore.isAdmin) return t('s_role_admin');
+  if (authStore.isAccountant) return t('s_role_accountant');
+  return t('s_role_employee');
+});
+
 const fetchAlerts = async () => {
-  if (authStore.isAdmin || authStore.isLeader) {
+  if (authStore.isAdmin || authStore.isAccountant) {
     try {
       const res = await reportApi.getHrAlerts();
       if (res.isSuccess && res.data) {
@@ -107,12 +113,12 @@ const handleLogout = () => {
         to="/attendance"
         class="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition-colors"
       >
-        <QrCode class="w-4 h-4" />
-        {{ t('b_scan_qr') }}
+        <ScanFace class="w-4 h-4" />
+        {{ t('b_open_face_scanner') }}
       </router-link>
 
-      <!-- HR Alerts Dropdown (Admin/Leader) -->
-      <div v-if="authStore.isAdmin || authStore.isLeader" class="relative">
+      <!-- HR Alerts Dropdown (Admin/Accountant) -->
+      <div v-if="authStore.isAdmin || authStore.isAccountant" class="relative">
         <button
           @click="isAlertsOpen = !isAlertsOpen; isUserMenuOpen = false"
           class="relative p-2 rounded-xl text-slate-500 hover:bg-slate-100 transition-colors"
@@ -220,7 +226,7 @@ const handleLogout = () => {
               {{ authStore.user?.displayName || t('l_account') }}
             </span>
             <span class="text-[10px] text-slate-400">
-              {{ authStore.user?.role || 'User' }}
+              {{ roleLabel }}
             </span>
           </div>
           <ChevronDown class="w-3.5 h-3.5 text-slate-400" />
@@ -233,7 +239,7 @@ const handleLogout = () => {
         >
           <div class="px-4 py-2.5 border-b border-slate-100 mb-1">
             <div class="text-xs font-semibold text-slate-800">{{ authStore.user?.displayName }}</div>
-            <div class="text-[11px] text-slate-400 truncate">{{ t('l_role') }}: {{ authStore.user?.role }}</div>
+            <div class="text-[11px] text-slate-400 truncate">{{ t('l_role') }}: {{ roleLabel }}</div>
           </div>
 
           <router-link

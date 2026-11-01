@@ -109,12 +109,12 @@ const showAssignRoleModal = ref(false);
 const assignRoleLoading = ref(false);
 const assignRoleForm = reactive<AssignRoleDto>({
   email: '',
-  role: 'User',
+  role: 'Employee',
 });
 
 const openAssignRole = (u: UserInfoDto) => {
   assignRoleForm.email = u.email;
-  assignRoleForm.role = u.role || 'User';
+  assignRoleForm.role = u.role || 'Employee';
   showAssignRoleModal.value = true;
 };
 
@@ -204,15 +204,21 @@ const handleAssignClaim = async () => {
             :key="r.id"
             class="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between"
           >
-            <div>
+            <div class="flex flex-wrap items-center gap-2">
               <span class="font-bold text-slate-800 text-xs sm:text-sm">{{ r.name }}</span>
-              <span v-if="r.name === 'Admin'" class="ml-2 text-xs bg-indigo-100 text-indigo-700 font-semibold px-2 py-0.5 rounded-lg">
+              <span v-if="r.name === 'Admin'" class="text-xs bg-indigo-100 text-indigo-700 font-semibold px-2 py-0.5 rounded-lg">
                 {{ t('l_full_access_badge') }}
+              </span>
+              <span v-else-if="r.name === 'Accountant'" class="text-xs bg-emerald-100 text-emerald-700 font-semibold px-2 py-0.5 rounded-lg">
+                {{ t('l_accountant_access_badge') }}
+              </span>
+              <span v-else-if="r.name === 'Employee'" class="text-xs bg-sky-100 text-sky-700 font-semibold px-2 py-0.5 rounded-lg">
+                {{ t('l_employee_access_badge') }}
               </span>
             </div>
 
             <button
-              v-if="r.name !== 'Admin' && r.name !== 'User'"
+              v-if="!['Admin', 'Accountant', 'Employee'].includes(r.name)"
               @click="confirmDeleteRole(r.name)"
               class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg transition-colors"
               :title="t('l_delete_this_role')"
@@ -265,10 +271,18 @@ const handleAssignClaim = async () => {
                       'px-2.5 py-1 rounded-lg text-xs font-semibold border',
                       u.role === 'Admin'
                         ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
-                        : 'bg-slate-100 text-slate-700 border-slate-200',
+                        : u.role === 'Accountant'
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                          : 'bg-sky-50 text-sky-700 border-sky-200',
                     ]"
                   >
-                    {{ u.role || 'User' }}
+                    {{
+                      u.role === 'Admin'
+                        ? t('s_role_admin')
+                        : u.role === 'Accountant'
+                          ? t('s_role_accountant')
+                          : t('s_role_employee')
+                    }}
                   </span>
                 </td>
                 <td class="py-3 px-4 text-right">

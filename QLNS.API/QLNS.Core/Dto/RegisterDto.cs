@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,7 +17,6 @@ namespace QLNS.Core.Dto
     public class RegisterInfoDto
     {
         public Guid Id { get; set; }
-
         public string DisplayName { get; set; }
         public string Token { get; set; }
     }
@@ -27,5 +26,7 @@ namespace QLNS.Core.Dto
         public Guid Id { get; set; }
         public string DisplayName { get; set; }
         public string Role { get; set; }
+        public bool HasRegisteredFace { get; set; }
+        public string? FaceImageUrl { get; set; }
     }
 }

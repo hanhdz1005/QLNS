@@ -124,7 +124,7 @@ const exportSalaryCsv = async () => {
 };
 
 onMounted(() => {
-  if (authStore.isAdmin || authStore.isLeader) {
+  if (authStore.canManagePayroll) {
     fetchPayroll();
   } else {
     activeTab.value = 'my-payslip';
@@ -150,7 +150,7 @@ onMounted(() => {
       <!-- Navigation Tabs -->
       <div class="flex items-center p-1 bg-slate-200/80 rounded-xl text-xs sm:text-sm font-semibold">
         <button
-          v-if="authStore.isAdmin || authStore.isLeader"
+          v-if="authStore.canManagePayroll"
           @click="activeTab = 'company'; fetchPayroll()"
           :class="[
             'flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all',
@@ -188,7 +188,7 @@ onMounted(() => {
       <PayrollFilterBar
         v-model:month="selectedMonth"
         v-model:year="selectedYear"
-        :is-admin="authStore.isAdmin"
+        :is-admin="authStore.canManagePayroll"
         @open-generate="openGenerateModal"
         @export-csv="exportSalaryCsv"
         @reload="fetchPayroll"

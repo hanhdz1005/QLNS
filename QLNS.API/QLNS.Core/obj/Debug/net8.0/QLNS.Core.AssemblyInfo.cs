@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("QLNS.Core")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7391c2ec65d76bc6e4f4a0eb00bac5b958348144")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8012b47b99ce3bc9551d70fb827e4634202e95b8")]
 [assembly: System.Reflection.AssemblyProductAttribute("QLNS.Core")]
 [assembly: System.Reflection.AssemblyTitleAttribute("QLNS.Core")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

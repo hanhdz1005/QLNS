@@ -194,7 +194,7 @@ const handleDelete = async () => {
       </div>
 
       <button
-        v-if="authStore.isAdmin"
+        v-if="authStore.canManagePayroll"
         @click="openAddModal"
         class="inline-flex items-center gap-2 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-md shadow-indigo-600/20 transition-colors"
       >
@@ -252,7 +252,7 @@ const handleDelete = async () => {
               <td class="py-3 px-4 text-slate-700 font-semibold font-mono">{{ formatCurrency(s.grossSalary) }}</td>
               <td class="py-3 px-4 text-right font-bold text-emerald-600 font-mono text-xs sm:text-sm">{{ formatCurrency(s.totalSalary) }}</td>
               <td class="py-3 px-4 text-right">
-                <div v-if="authStore.isAdmin" class="inline-flex items-center gap-1">
+                <div v-if="authStore.canManagePayroll" class="inline-flex items-center gap-1">
                   <button
                     @click="openEditModal(s)"
                     :title="t('b_edit')"

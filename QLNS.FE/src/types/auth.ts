@@ -24,6 +24,8 @@ export interface GetCurrentUserDto {
   id: string;
   displayName: string;
   role: string;
+  hasRegisteredFace?: boolean;
+  faceImageUrl?: string | null;
 }
 
 export interface UserInfoDto {

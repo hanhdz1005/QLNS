@@ -45,4 +45,11 @@ export const status = {
   s_bonus: 'Bonus',
   s_penalty: 'Disciplinary Penalty',
   s_unknown: 'Unknown',
+
+  // Core Roles
+  s_role_admin: 'Administrator (Admin)',
+  s_role_accountant: 'Accountant',
+  s_role_employee: 'Employee',
+  l_accountant_access_badge: 'Payroll & Finance',
+  l_employee_access_badge: 'Self-Service',
 };

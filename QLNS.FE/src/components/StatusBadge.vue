@@ -7,31 +7,24 @@ import {
   getLeaveStatusInfo,
   getBonusPenaltyLabel,
 } from '@/utils/formatters';
-import type {
-  EmployeeStatus,
-  AttendanceStatus,
-  ContractStatus,
-  LeaveStatus,
-  BonusPenaltyType,
-} from '@/types';
 
 const props = defineProps<{
   type: 'employee' | 'attendance' | 'contract' | 'leave' | 'bonusPenalty';
-  value: number;
+  value: string | number;
 }>();
 
 const badgeInfo = computed(() => {
   switch (props.type) {
     case 'employee':
-      return getEmployeeStatusInfo(props.value as EmployeeStatus);
+      return getEmployeeStatusInfo(props.value);
     case 'attendance':
-      return getAttendanceStatusInfo(props.value as AttendanceStatus);
+      return getAttendanceStatusInfo(props.value);
     case 'contract':
-      return getContractStatusInfo(props.value as ContractStatus);
+      return getContractStatusInfo(props.value);
     case 'leave':
-      return getLeaveStatusInfo(props.value as LeaveStatus);
+      return getLeaveStatusInfo(props.value);
     case 'bonusPenalty':
-      return getBonusPenaltyLabel(props.value as BonusPenaltyType);
+      return getBonusPenaltyLabel(props.value);
     default:
       return { text: '—', color: 'bg-slate-100 text-slate-600' };
   }

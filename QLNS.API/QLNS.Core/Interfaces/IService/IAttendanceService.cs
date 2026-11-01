@@ -15,7 +15,17 @@ namespace QLNS.Core.Interfaces.IService
         Task<AttendanceDto> UpdateAsync(Guid id, AddAttendanceDto dto);
         Task<bool> DeleteAsync(Guid id);
 
-        // Chấm công bằng mã QR động
+        // Nhận diện khuôn mặt (Face Recognition B1 - B4)
+        Task<(bool Success, string Message, string? ErrorCode, string? ImageUrl)> RegisterFaceAsync(
+            string userIdentifier,
+            FaceRegisterDto dto);
+
+        Task<FaceCheckInResultDto> FaceCheckInAsync(
+            string userIdentifier,
+            FaceCheckInDto dto,
+            string? fallbackUserEmbedding = null);
+
+        // Chấm công bằng mã QR động (Legacy / Fallback)
         Task<(string Token, int ExpiresInSeconds)> GenerateQrTokenAsync();
         Task<QrCheckInResultDto> QrCheckInAsync(string qrToken, string userIdentifier);
 

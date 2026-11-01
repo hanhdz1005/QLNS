@@ -5,6 +5,7 @@ using QLNS.Core.Interfaces;
 using QLNSCore.Entities;
 using System;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace QLNS.API.Controllers
 {
@@ -14,11 +15,16 @@ namespace QLNS.API.Controllers
     {
         private readonly IAuthRepository _authRepository;
         private readonly UserManager<AppUser> _userManager;
+        private readonly IEmployeeRepository _employeeRepository;
 
-        public AuthController(IAuthRepository authRepository, UserManager<AppUser> userManager)
+        public AuthController(
+            IAuthRepository authRepository,
+            UserManager<AppUser> userManager,
+            IEmployeeRepository employeeRepository)
         {
             _authRepository = authRepository;
             _userManager = userManager;
+            _employeeRepository = employeeRepository;
         }
 
         private async Task<bool> CheckEmail(string email)
@@ -42,8 +48,6 @@ namespace QLNS.API.Controllers
             {
                 return BadRequest(Result<bool>.Failure(ex.Message));
             }
-
-            
         }
 
         [HttpPost("login")]
@@ -89,16 +93,24 @@ namespace QLNS.API.Controllers
             if (user == null)
                 return Unauthorized(Result<bool>.Failure("Người dùng không tồn tại.", errorCode: "USER_NOT_FOUND"));
 
-            var Data = (new GetCurrentUserDto
+            var employee = await _employeeRepository.GetByIdentifierAsync(email);
+            bool hasRegisteredFace = !string.IsNullOrWhiteSpace(user.FaceEmbedding)
+                || !string.IsNullOrWhiteSpace(employee?.FaceEmbedding);
+
+            var normalizedRole = string.IsNullOrWhiteSpace(user.Role) || user.Role == "User" || user.Role == "Leader"
+                ? QLNS.Core.Common.RoleConstants.Employee
+                : user.Role;
+
+            var data = new GetCurrentUserDto
             {
                 Id = Guid.Parse(user.Id),
                 DisplayName = user.DisplayName,
-                Role = user.Role
-            });
-            var res = Result<GetCurrentUserDto>.Success(Data);
-            return Ok(res);
+                Role = normalizedRole,
+                HasRegisteredFace = hasRegisteredFace,
+                FaceImageUrl = user.AvatarUrl ?? employee?.FaceImageUrl
+            };
 
+            return Ok(Result<GetCurrentUserDto>.Success(data));
         }
     }
-    
 }

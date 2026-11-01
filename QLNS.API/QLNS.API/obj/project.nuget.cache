@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "I0enj9T13vY=",
+  "dgSpecHash": "EaV4YJfh58c=",
   "success": true,
-  "projectFilePath": "D:\\Blazor study\\QLNS\\QLNS.API\\QLNS.API\\QLNS.API.csproj",
+  "projectFilePath": "D:\\Blazor study\\QLNS\\QLNS\\QLNS.API\\QLNS.API\\QLNS.API.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\hzkil\\.nuget\\packages\\automapper\\13.0.1\\automapper.13.0.1.nupkg.sha512",
     "C:\\Users\\hzkil\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
@@ -126,9 +126,9 @@
       "code": "NU1903",
       "level": "Warning",
       "message": "Package 'AutoMapper' 13.0.1 has a known high severity vulnerability, https://github.com/advisories/GHSA-rvv3-g6hj-g44x",
-      "projectPath": "D:\\Blazor study\\QLNS\\QLNS.API\\QLNS.API\\QLNS.API.csproj",
+      "projectPath": "D:\\Blazor study\\QLNS\\QLNS\\QLNS.API\\QLNS.API\\QLNS.API.csproj",
       "warningLevel": 1,
-      "filePath": "D:\\Blazor study\\QLNS\\QLNS.API\\QLNS.API\\QLNS.API.csproj",
+      "filePath": "D:\\Blazor study\\QLNS\\QLNS\\QLNS.API\\QLNS.API\\QLNS.API.csproj",
       "libraryId": "AutoMapper",
       "targetGraphs": [
         "net8.0"

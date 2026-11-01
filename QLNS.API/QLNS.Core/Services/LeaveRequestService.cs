@@ -1,13 +1,12 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using QLNS.Core.Common;
-using QLNS.Core.Interfaces.IService;
 using QLNS.Core.Dto;
+using QLNS.Core.Interfaces.IService;
 using QLNSCore.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace QLNS.Core.Services
@@ -28,17 +27,34 @@ namespace QLNS.Core.Services
             var items = await _uow.LeaveRequestRepository
                 .Query()
                 .Include(l => l.Employee)
-                .OrderBy(l => l.FromDate)
+                .OrderByDescending(l => l.FromDate)
                 .ToListAsync();
             return _mapper.Map<IReadOnlyList<LeaveRequestDto>>(items);
         }
 
-        public async Task<PagedResult<LeaveRequestDto>> GetFilterAsync(int pageIndex, int pageSize, string? search)
+        public async Task<PagedResult<LeaveRequestDto>> GetFilterAsync(
+            int pageIndex,
+            int pageSize,
+            string? search,
+            string? userIdentifier = null)
         {
             var query = _uow.LeaveRequestRepository
                 .Query()
                 .Include(l => l.Employee)
                 .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(userIdentifier))
+            {
+                var employee = await _uow.EmployeeRepository.GetByIdentifierAsync(userIdentifier);
+                if (employee != null)
+                {
+                    query = query.Where(l => l.EmployeeId == employee.Id);
+                }
+                else
+                {
+                    query = query.Where(_ => false);
+                }
+            }
 
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -47,7 +63,7 @@ namespace QLNS.Core.Services
             }
 
             return await query
-                .OrderBy(l => l.FromDate)
+                .OrderByDescending(l => l.FromDate)
                 .ToPagedResultAsync<LeaveRequest, LeaveRequestDto>(pageIndex, pageSize, _mapper);
         }
 
@@ -79,10 +95,11 @@ namespace QLNS.Core.Services
                 FromDate = dto.FromDate,
                 ToDate = dto.ToDate,
                 Reason = dto.Reason,
+                LeaveType = dto.LeaveType,
                 Status = LeaveStatus.Pending,
                 CreatedDate = DateOnly.FromDateTime(DateTime.Now)
             };
-            
+
             await _uow.LeaveRequestRepository.AddAsync(entity);
             return _mapper.Map<LeaveRequestDto>(entity);
         }
@@ -95,9 +112,6 @@ namespace QLNS.Core.Services
 
             if (dto.ToDate < dto.FromDate)
                 throw new InvalidOperationException("ToDate must be greater than or equal to FromDate");
-
-            if (dto.ToDate > dto.FromDate.AddDays(1))
-                throw new InvalidOperationException("ToDate can only be the same day or the next day of FromDate");
 
             var employee = await _uow.EmployeeRepository.GetAsync(dto.EmployeeId);
             if (employee == null)

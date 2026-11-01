@@ -4,6 +4,15 @@ import { authApi } from '@/api/auth.api';
 import type { LoginDto, RegisterDto, GetCurrentUserDto } from '@/types';
 import router from '@/router';
 
+export type AppRole = 'Admin' | 'Accountant' | 'Employee';
+
+export function normalizeAppRole(rawRole?: string | null): AppRole {
+  const lower = (rawRole || '').trim().toLowerCase();
+  if (lower === 'admin') return 'Admin';
+  if (lower === 'accountant' || lower === 'kế toán' || lower === 'ke toan') return 'Accountant';
+  return 'Employee';
+}
+
 export const useAuthStore = defineStore('auth', () => {
   const getInitialUser = (): GetCurrentUserDto | null => {
     try {
@@ -19,8 +28,20 @@ export const useAuthStore = defineStore('auth', () => {
   const loading = ref(false);
 
   const isAuthenticated = computed(() => !!token.value);
-  const isAdmin = computed(() => user.value?.role?.toLowerCase() === 'admin');
-  const isLeader = computed(() => user.value?.role?.toLowerCase() === 'leader');
+  const normalizedRole = computed<AppRole>(() => normalizeAppRole(user.value?.role));
+  const isAdmin = computed(() => normalizedRole.value === 'Admin');
+  const isAccountant = computed(() => normalizedRole.value === 'Accountant');
+  const isEmployee = computed(() => normalizedRole.value === 'Employee');
+  const canManagePayroll = computed(() => isAdmin.value || isAccountant.value);
+
+  const hasAnyRole = (roles?: AppRole[]) => {
+    if (!roles || roles.length === 0) return true;
+    return roles.includes(normalizedRole.value);
+  };
+
+  const needsFaceRegistration = computed(
+    () => isAuthenticated.value && !!user.value && user.value.hasRegisteredFace === false
+  );
 
   const setAuthData = (accessToken: string, refreshToken?: string) => {
     token.value = accessToken;
@@ -31,8 +52,22 @@ export const useAuthStore = defineStore('auth', () => {
   };
 
   const setUser = (userData: GetCurrentUserDto) => {
-    user.value = userData;
-    localStorage.setItem('user_info', JSON.stringify(userData));
+    const normalized: GetCurrentUserDto = {
+      ...userData,
+      role: normalizeAppRole(userData.role),
+    };
+    user.value = normalized;
+    localStorage.setItem('user_info', JSON.stringify(normalized));
+  };
+
+  const markFaceRegistered = (faceImageUrl?: string | null) => {
+    if (user.value) {
+      setUser({
+        ...user.value,
+        hasRegisteredFace: true,
+        faceImageUrl: faceImageUrl ?? user.value.faceImageUrl,
+      });
+    }
   };
 
   const login = async (dto: LoginDto) => {
@@ -86,7 +121,7 @@ export const useAuthStore = defineStore('auth', () => {
   };
 
   const initAuth = async () => {
-    if (token.value && !user.value) {
+    if (token.value) {
       await fetchCurrentUser();
     }
   };
@@ -96,11 +131,17 @@ export const useAuthStore = defineStore('auth', () => {
     user,
     loading,
     isAuthenticated,
+    normalizedRole,
     isAdmin,
-    isLeader,
+    isAccountant,
+    isEmployee,
+    canManagePayroll,
+    hasAnyRole,
+    needsFaceRegistration,
     login,
     register,
     fetchCurrentUser,
+    markFaceRegistered,
     logout,
     initAuth,
   };

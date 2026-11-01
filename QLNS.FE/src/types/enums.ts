@@ -1,52 +1,52 @@
 export enum Gender {
-  Male = 1,
-  Female = 2,
-  Other = 3,
+  Male = 'Male',
+  Female = 'Female',
+  Other = 'Other',
 }
 
 export enum EmployeeStatus {
-  Active = 1,
-  Inactive = 2,
-  Resigned = 3,
-  Probation = 4,
+  Active = 'Active',
+  Inactive = 'Inactive',
+  Resigned = 'Resigned',
+  Probation = 'Probation',
 }
 
 export enum AttendanceStatus {
-  Present = 1,
-  Absent = 2,
-  Late = 3,
-  EarlyLeave = 4,
-  WorkFromHome = 5,
-  Leave = 6,
+  Present = 'Present',
+  Absent = 'Absent',
+  Late = 'Late',
+  EarlyLeave = 'EarlyLeave',
+  WorkFromHome = 'WorkFromHome',
+  Leave = 'Leave',
 }
 
 export enum ContractType {
-  Probation = 1,
-  DefiniteTerm = 2,
-  IndefiniteTerm = 3,
-  Internship = 4,
-  PartTime = 5,
+  Probation = 'Probation',
+  DefiniteTerm = 'DefiniteTerm',
+  IndefiniteTerm = 'IndefiniteTerm',
+  Internship = 'Internship',
+  PartTime = 'PartTime',
 }
 
 export enum ContractStatus {
-  Active = 1,
-  Expired = 2,
-  Terminated = 3,
+  Active = 'Active',
+  Expired = 'Expired',
+  Terminated = 'Terminated',
 }
 
 export enum LeaveType {
-  AnnualLeave = 1,
-  SickLeave = 2,
-  MaternityLeave = 3,
-  SpecialLeave = 4,
-  UnpaidLeave = 5,
+  AnnualLeave = 'AnnualLeave',
+  SickLeave = 'SickLeave',
+  MaternityLeave = 'MaternityLeave',
+  SpecialLeave = 'SpecialLeave',
+  UnpaidLeave = 'UnpaidLeave',
 }
 
 export enum LeaveStatus {
-  Pending = 1,
-  Approved = 2,
-  Rejected = 3,
-  Cancelled = 4,
+  Pending = 'Pending',
+  Approved = 'Approved',
+  Rejected = 'Rejected',
+  Cancelled = 'Cancelled',
 }
 
 export enum BonusPenaltyType {

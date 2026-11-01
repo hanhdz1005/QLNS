@@ -46,7 +46,7 @@ const maxWidthClasses = {
     >
       <div
         v-if="modelValue"
-        class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6"
+        class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/35 flex items-center justify-center p-4 sm:p-6"
         @click.self="close"
       >
         <div

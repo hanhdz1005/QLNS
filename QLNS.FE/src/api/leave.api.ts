@@ -16,8 +16,13 @@ export const leaveApi = {
     return res.data;
   },
 
-  getFilterRequests: async (pageIndex = 1, pageSize = 10, search?: string): Promise<ApiResponse<PagedResult<LeaveRequestDto>>> => {
-    const params: Record<string, unknown> = { pageIndex, pageSize };
+  getFilterRequests: async (
+    pageIndex = 1,
+    pageSize = 10,
+    search?: string,
+    myOnly = false
+  ): Promise<ApiResponse<PagedResult<LeaveRequestDto>>> => {
+    const params: Record<string, unknown> = { pageIndex, pageSize, myOnly };
     if (search) params.search = search;
     const res = await apiClient.get<ApiResponse<PagedResult<LeaveRequestDto>>>('/LeaveRequest/filter', { params });
     return res.data;

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import { useAuthStore } from '@/stores/auth';
 import { useToastStore } from '@/stores/toast';
 import { useI18n } from '@/locales';
 import { reportApi } from '@/api/report.api';
@@ -11,6 +12,7 @@ import DashboardKpiCards from './dashboard/components/DashboardKpiCards.vue';
 import DashboardDepartmentStats from './dashboard/components/DashboardDepartmentStats.vue';
 import DashboardHrAlerts from './dashboard/components/DashboardHrAlerts.vue';
 
+const authStore = useAuthStore();
 const toastStore = useToastStore();
 const { t } = useI18n();
 
@@ -38,7 +40,7 @@ const loadDashboard = async () => {
     const [dashRes, statsRes, alertsRes] = await Promise.allSettled([
       reportApi.getDashboard(),
       reportApi.getEmployeeStats(),
-      reportApi.getHrAlerts(),
+      authStore.canManagePayroll ? reportApi.getHrAlerts() : Promise.resolve(null),
     ]);
 
     if (dashRes.status === 'fulfilled' && dashRes.value.isSuccess) {
@@ -47,7 +49,7 @@ const loadDashboard = async () => {
     if (statsRes.status === 'fulfilled' && statsRes.value.isSuccess) {
       employeeStats.value = statsRes.value.data.items || [];
     }
-    if (alertsRes.status === 'fulfilled' && alertsRes.value.isSuccess) {
+    if (alertsRes.status === 'fulfilled' && alertsRes.value && alertsRes.value.isSuccess) {
       hrAlerts.value = alertsRes.value.data;
     }
   } catch (error) {
@@ -90,9 +92,9 @@ const handleExportEmployees = async () => {
 
     <!-- Two-column Layout: Analytics & Alerts -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-6">
-      <div class="lg:col-span-2 space-y-5 lg:space-y-6">
-        <!-- Payroll Quick Overview -->
-        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+      <div :class="[authStore.canManagePayroll ? 'lg:col-span-2' : 'lg:col-span-3', 'space-y-5 lg:space-y-6']">
+        <!-- Payroll Quick Overview (Admin & Accountant only) -->
+        <div v-if="authStore.canManagePayroll" class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
           <div class="flex items-center justify-between mb-4">
             <div>
               <h2 class="text-sm sm:text-base font-bold text-slate-800">{{ t('l_payroll_and_income_average') }}</h2>
@@ -129,8 +131,8 @@ const handleExportEmployees = async () => {
         />
       </div>
 
-      <!-- Right Column: HR Alerts & Reminders -->
-      <div>
+      <!-- Right Column: HR Alerts & Reminders (Admin & Accountant only) -->
+      <div v-if="authStore.canManagePayroll">
         <DashboardHrAlerts :alerts="hrAlerts" />
       </div>
     </div>

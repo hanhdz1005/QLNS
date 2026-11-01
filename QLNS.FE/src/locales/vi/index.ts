@@ -4,6 +4,7 @@ import { labels } from './labels';
 import { status } from './status';
 import { toast } from './toast';
 import { errors } from './errors';
+import { face } from './face';
 
 export const vi = {
   ...navigation,
@@ -12,6 +13,7 @@ export const vi = {
   ...status,
   ...toast,
   ...errors,
+  ...face,
 };
 
 export type LocaleSchema = typeof vi;

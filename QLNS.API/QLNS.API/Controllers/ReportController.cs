@@ -57,7 +57,7 @@ namespace QLNS.API.Controllers
             return Ok(Result<SalaryReportDto>.Success(data));
         }
 
-        [Authorize(Roles = RoleConstants.AdminOrAccountant)]
+        [Authorize(Roles = RoleConstants.AttendanceViewAllRoles)]
         [HttpGet("hr-alerts")]
         public async Task<ActionResult> GetHrAlerts()
         {

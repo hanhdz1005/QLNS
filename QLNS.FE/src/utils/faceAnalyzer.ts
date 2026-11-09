@@ -135,6 +135,16 @@ export function extractFaceFromVideo(videoEl: HTMLVideoElement): FaceExtractionR
   };
 }
 
+export function calculateDescriptorDistance(descA: number[], descB: number[]): number {
+  if (descA.length === 0 || descA.length !== descB.length) return 999;
+  let sumSq = 0;
+  for (let i = 0; i < descA.length; i++) {
+    const diff = (descA[i] ?? 0) - (descB[i] ?? 0);
+    sumSq += diff * diff;
+  }
+  return Math.sqrt(sumSq);
+}
+
 export function getFaceErrorLocaleKey(
   code: string | null,
   fallbackKey: 'e_camera_connect_failed' | 'e_face_register_failed' = 'e_camera_connect_failed'

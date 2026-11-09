@@ -27,7 +27,7 @@ namespace QLNS.API.Controllers
             _userManager = userManager;
         }
 
-        [Authorize(Roles = RoleConstants.AdminOrAccountant)]
+        [Authorize(Roles = RoleConstants.AttendanceViewAllRoles)]
         [HttpGet]
         public async Task<ActionResult> GetAll()
         {
@@ -39,7 +39,7 @@ namespace QLNS.API.Controllers
             return Ok(Result<ListItems<AttendanceDto>>.Success(data));
         }
 
-        [Authorize(Roles = RoleConstants.AdminOrAccountant)]
+        [Authorize(Roles = RoleConstants.AttendanceViewAllRoles)]
         [HttpGet("filter")]
         public async Task<ActionResult> GetFilter(
             [FromQuery] int pageIndex = 1,
@@ -50,7 +50,7 @@ namespace QLNS.API.Controllers
             return Ok(Result<PagedResult<AttendanceDto>>.Success(data));
         }
 
-        [Authorize(Roles = RoleConstants.AdminOrAccountant)]
+        [Authorize(Roles = RoleConstants.AttendanceViewAllRoles)]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetById(Guid id)
         {
@@ -65,7 +65,7 @@ namespace QLNS.API.Controllers
             }
         }
 
-        [Authorize(Roles = RoleConstants.Admin)]
+        [Authorize(Roles = RoleConstants.AdminOrHR)]
         [HttpPost]
         public async Task<ActionResult> Add(AddAttendanceDto dto)
         {
@@ -88,7 +88,7 @@ namespace QLNS.API.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = RoleConstants.AdminOrHR)]
         [HttpPut("{id}")]
         public async Task<ActionResult> Update(Guid id, AddAttendanceDto dto)
         {
@@ -103,7 +103,7 @@ namespace QLNS.API.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = RoleConstants.AdminOrHRManager)]
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(Guid id)
         {

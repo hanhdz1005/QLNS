@@ -4,7 +4,8 @@ import { useAuthStore } from '@/stores/auth';
 import { useToastStore } from '@/stores/toast';
 import { useI18n } from '@/locales';
 import { useCamera } from '@/composables/useCamera';
-import { extractFaceFromVideo, getFaceErrorLocaleKey } from '@/utils/faceAnalyzer';
+import { useRealtimeFaceScan } from '@/composables/useRealtimeFaceScan';
+import { getFaceErrorLocaleKey, type FaceExtractionResult } from '@/utils/faceAnalyzer';
 import { attendanceApi } from '@/api/attendance.api';
 import {
   Camera,
@@ -48,42 +49,8 @@ const saving = ref(false);
 const getErrorMessageByCode = (code: string | null) =>
   t(getFaceErrorLocaleKey(code, 'e_face_register_failed'));
 
-const handleConnectCamera = async () => {
-  captureErrorCode.value = null;
-  const { connected, errorCode } = await connectCamera();
-  if (connected) {
-    toastStore.info(t('t_camera_connected'));
-  } else if (errorCode) {
-    toastStore.error(getErrorMessageByCode(errorCode));
-  }
-};
-
-const handleCaptureFace = () => {
-  if (!videoRef.value || !isCameraConnected.value) return;
-  captureErrorCode.value = null;
-
-  const result = extractFaceFromVideo(videoRef.value);
-  if (!result.valid) {
-    captureErrorCode.value = result.errorCode || 'FACE_NOT_DETECTED';
-    toastStore.error(t('e_face_not_detected'));
-    return;
-  }
-
-  capturedImage.value = result.imageBase64;
-  capturedDescriptor.value = result.descriptor;
-};
-
-const handleRetake = async () => {
-  capturedImage.value = '';
-  capturedDescriptor.value = [];
-  captureErrorCode.value = null;
-  if (!isCameraConnected.value) {
-    await handleConnectCamera();
-  }
-};
-
 const handleSaveFace = async () => {
-  if (!capturedImage.value || capturedDescriptor.value.length === 0) return;
+  if (!capturedImage.value || capturedDescriptor.value.length === 0) return false;
 
   saving.value = true;
   captureErrorCode.value = null;
@@ -96,20 +63,63 @@ const handleSaveFace = async () => {
     if (res.isSuccess) {
       authStore.markFaceRegistered(res.data?.faceImageUrl);
       toastStore.success(t('t_face_register_success'));
+      stopAutoScanLoop();
       disconnectCamera();
       emit('registered');
       emit('close');
+      return true;
     } else {
       captureErrorCode.value = res.errorCode || 'FACE_REGISTER_FAILED';
       toastStore.error(res.message || t('e_face_register_failed'));
+      return false;
     }
   } catch (err: unknown) {
     const errData = (err as { response?: { data?: { errorCode?: string; message?: string } } })
       ?.response?.data;
     captureErrorCode.value = errData?.errorCode || 'FACE_REGISTER_FAILED';
     toastStore.error(errData?.message || t('e_face_register_failed'));
+    return false;
   } finally {
     saving.value = false;
+  }
+};
+
+const onFirstFaceLocked = async (extracted: FaceExtractionResult): Promise<boolean> => {
+  capturedImage.value = extracted.imageBase64;
+  capturedDescriptor.value = extracted.descriptor;
+  return await handleSaveFace();
+};
+
+const {
+  scanProgress,
+  startAutoScanLoop,
+  stopAutoScanLoop,
+  resetProgress,
+} = useRealtimeFaceScan(videoRef, isCameraConnected, onFirstFaceLocked, {
+  requiredStableFrames: 5,
+  intervalMs: 250,
+  cooldownTotalSeconds: 4,
+});
+
+const handleConnectCamera = async () => {
+  captureErrorCode.value = null;
+  const { connected, errorCode } = await connectCamera();
+  if (connected) {
+    toastStore.info(t('t_camera_connected'));
+    startAutoScanLoop();
+  } else if (errorCode) {
+    toastStore.error(getErrorMessageByCode(errorCode));
+  }
+};
+
+const handleRetake = async () => {
+  capturedImage.value = '';
+  capturedDescriptor.value = [];
+  captureErrorCode.value = null;
+  if (!isCameraConnected.value) {
+    await handleConnectCamera();
+  } else {
+    resetProgress();
   }
 };
 
@@ -122,6 +132,7 @@ watch(
       captureErrorCode.value = null;
       await handleConnectCamera();
     } else {
+      stopAutoScanLoop();
       disconnectCamera();
     }
   },
@@ -185,7 +196,7 @@ watch(
             </div>
           </div>
 
-          <!-- Camera Viewport / Captured Photo Preview -->
+          <!-- Camera Viewport & Auto-Scan Progress -->
           <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
             <div class="md:col-span-7">
               <div
@@ -207,7 +218,7 @@ watch(
                   class="w-full h-full object-cover -scale-x-100"
                 />
 
-                <!-- Oval Face Alignment Overlay -->
+                <!-- Oval Face Alignment & Auto-Lock Progress -->
                 <div
                   v-if="isCameraConnected && !capturedImage"
                   class="absolute inset-0 pointer-events-none flex flex-col items-center justify-center"
@@ -215,14 +226,20 @@ watch(
                   <div
                     class="w-40 h-52 rounded-full border-2 border-dashed border-emerald-400/90 shadow-[0_0_25px_rgba(16,185,129,0.35)]"
                   />
-                  <span
-                    class="mt-2 px-2.5 py-0.5 rounded-full bg-slate-900/75 text-[11px] font-medium text-emerald-300"
-                  >
-                    {{ t('l_camera_ready_hint') }}
-                  </span>
+                  <div class="mt-2.5 w-48 bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-700 space-y-1">
+                    <div class="flex justify-between text-[11px] font-medium text-emerald-300">
+                      <span>{{ t('l_face_locking_progress') }}</span>
+                      <span class="font-mono">{{ scanProgress }}%</span>
+                    </div>
+                    <div class="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                      <div
+                        class="h-full bg-emerald-400 transition-all duration-200"
+                        :style="{ width: `${scanProgress}%` }"
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                <!-- Disconnected Placeholder -->
                 <div
                   v-if="!isCameraConnected && !capturedImage"
                   class="flex flex-col items-center justify-center text-center p-6 text-slate-400"
@@ -285,16 +302,6 @@ watch(
             >
               <Camera class="w-4 h-4" />
               {{ cameraErrorCode ? t('b_reconnect_camera') : t('b_connect_camera') }}
-            </button>
-
-            <button
-              v-if="isCameraConnected && !capturedImage"
-              type="button"
-              class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-md shadow-indigo-600/20 transition-all"
-              @click="handleCaptureFace"
-            >
-              <Camera class="w-4 h-4" />
-              {{ t('b_capture_first_face') }}
             </button>
 
             <template v-if="capturedImage">

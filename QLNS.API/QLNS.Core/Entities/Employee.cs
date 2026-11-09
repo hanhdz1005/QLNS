@@ -59,6 +59,7 @@ namespace QLNSCore.Entities
         public ICollection<BonusPenalty> BonusPenalties { get; set; } = new List<BonusPenalty>();
         public ICollection<Contract> Contracts { get; set; } = new List<Contract>();
         public ICollection<LeaveBalance> LeaveBalances { get; set; } = new List<LeaveBalance>();
+        public ICollection<OvertimeRequest> OvertimeRequests { get; set; } = new List<OvertimeRequest>();
     }
 
     public enum EmployeeStatus

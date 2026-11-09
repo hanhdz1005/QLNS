@@ -5,5 +5,7 @@ export * from './employee';
 export * from './attendance';
 export * from './contract';
 export * from './leave';
+export * from './overtime';
+export * from './lifecycle';
 export * from './payroll';
 export * from './report';

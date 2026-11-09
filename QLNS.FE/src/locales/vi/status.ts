@@ -46,10 +46,23 @@ export const status = {
   s_penalty: 'Kỷ luật / Phạt',
   s_unknown: 'Không rõ',
 
-  // Core Roles
+  // 6-Tier Enterprise Roles
   s_role_admin: 'Quản trị viên (Admin)',
-  s_role_accountant: 'Kế toán (Accountant)',
+  s_role_hr_manager: 'Trưởng phòng Nhân sự (HR Manager)',
+  s_role_hr_staff: 'Chuyên viên Nhân sự (HR Staff)',
+  s_role_accountant: 'Kế toán tiền lương (Accountant)',
+  s_role_department_manager: 'Trưởng bộ phận (Dept Manager)',
   s_role_employee: 'Nhân viên (Employee)',
+
+  l_hr_manager_access_badge: 'Quản trị Nhân sự & Duyệt đơn',
+  l_hr_staff_access_badge: 'Nghiệp vụ Hồ sơ & Hợp đồng',
   l_accountant_access_badge: 'Lương & Tài chính',
-  l_employee_access_badge: 'Nhân viên',
+  l_dept_manager_access_badge: 'Duyệt OT/Phép & Quản lý bộ phận',
+  l_employee_access_badge: 'Nhân viên (Self-Service)',
+
+  // Lifecycle Stages
+  s_stage_internship: 'Thực tập sinh',
+  s_stage_probation: 'Thử việc',
+  s_stage_official: 'Làm chính thức',
+  s_stage_resigned: 'Đã thôi việc',
 };

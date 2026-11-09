@@ -43,6 +43,7 @@ namespace QLNS.Infrastructure
             services.AddScoped<IReportRepository, ReportRepository>();
             services.AddScoped<IContractRepository, ContractRepository>();
             services.AddScoped<ILeaveBalanceRepository, LeaveBalanceRepository>();
+            services.AddScoped<IOvertimeRequestRepository, OvertimeRequestRepository>();
             services.AddScoped<IDepartmentService, DepartmentService>();
             services.AddScoped<IEmployeeService, EmployeeService>();
             services.AddScoped<ISalaryService, SalaryService>();
@@ -55,6 +56,8 @@ namespace QLNS.Infrastructure
             services.AddScoped<ILeaveApprovalService, LeaveApprovalService>();
             services.AddScoped<IContractService, ContractService>();
             services.AddScoped<ILeaveBalanceService, LeaveBalanceService>();
+            services.AddScoped<IOvertimeService, OvertimeService>();
+            services.AddScoped<ILifecycleService, LifecycleService>();
             services.AddIdentity<AppUser, IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
@@ -154,12 +157,16 @@ namespace QLNS.Infrastructure
         {
             using var scope = app.ApplicationServices.CreateScope();
 
+            var dbContext = scope.ServiceProvider
+                .GetRequiredService<AppDbContext>();
+
             var userManager = scope.ServiceProvider
                 .GetRequiredService<UserManager<AppUser>>();
 
             var roleManager = scope.ServiceProvider
                 .GetRequiredService<RoleManager<IdentityRole>>();
 
+            await IdentitySeed.EnsureExtendedSchemaAsync(dbContext);
             await IdentitySeed.SeedAdminAsync(userManager, roleManager);
         }
     }

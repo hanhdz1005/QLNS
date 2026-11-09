@@ -7,7 +7,12 @@ export interface AttendanceDto {
   date: string;
   checkIn?: string;
   checkOut?: string;
+  firstCheckIn?: string;
+  lastCheckOut?: string;
+  regularHours?: number;
+  overtimeHours?: number;
   hoursWorked?: number;
+  scanCount?: number;
   status: AttendanceStatus;
   faceSnapshotUrl?: string | null;
   similarityScore?: number | null;
@@ -50,7 +55,12 @@ export interface FaceCheckInResultDto {
   employeeName: string;
   date: string;
   time: string;
+  firstCheckIn?: string | null;
+  lastCheckOut?: string | null;
+  regularHours?: number;
+  overtimeHours?: number;
   hoursWorked?: number;
+  scanCount?: number;
   similarityScore?: number;
   snapshotUrl?: string | null;
 }

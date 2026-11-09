@@ -18,11 +18,28 @@ namespace QLNS.Infrastructure.Respository
 
             identifier = identifier.Trim();
 
-            return await _context.Employee
+            var emp = await _context.Employee
                 .Include(e => e.Department)
                 .Include(e => e.Position)
                 .Include(e => e.Manager)
                 .FirstOrDefaultAsync(e => e.Email == identifier || e.Code == identifier || e.Id.ToString() == identifier);
+
+            if (emp == null)
+            {
+                var appUser = await _context.Users
+                    .FirstOrDefaultAsync(u => u.Email == identifier || u.UserName == identifier || u.Id == identifier);
+
+                if (appUser != null && !string.IsNullOrWhiteSpace(appUser.Code))
+                {
+                    emp = await _context.Employee
+                        .Include(e => e.Department)
+                        .Include(e => e.Position)
+                        .Include(e => e.Manager)
+                        .FirstOrDefaultAsync(e => e.Code == appUser.Code || e.Email == appUser.Email);
+                }
+            }
+
+            return emp;
         }
     }
 }

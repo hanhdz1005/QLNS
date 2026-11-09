@@ -75,7 +75,7 @@ namespace QLNS.API.Controllers
             return Ok(Result<IEnumerable<ContractDto>>.Success(items));
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = QLNS.Core.Common.RoleConstants.AdminOrHR)]
         [HttpPost]
         public async Task<ActionResult> Add([FromBody] AddContractDto dto)
         {
@@ -94,7 +94,7 @@ namespace QLNS.API.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = QLNS.Core.Common.RoleConstants.AdminOrHR)]
         [HttpPut("{id}")]
         public async Task<ActionResult> Update(Guid id, [FromBody] AddContractDto dto)
         {
@@ -113,7 +113,7 @@ namespace QLNS.API.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = QLNS.Core.Common.RoleConstants.AdminOrHRManager)]
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(Guid id)
         {

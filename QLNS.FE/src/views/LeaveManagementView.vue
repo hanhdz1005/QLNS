@@ -13,6 +13,7 @@ import LeaveRequestsTable from './leave/components/LeaveRequestsTable.vue';
 import LeaveApprovalsTable from './leave/components/LeaveApprovalsTable.vue';
 import LeaveRequestModal from './leave/components/LeaveRequestModal.vue';
 import LeaveConfigBalanceModal from './leave/components/LeaveConfigBalanceModal.vue';
+import OvertimeSection from './leave/components/OvertimeSection.vue';
 import BasePagination from '@/components/BasePagination.vue';
 import { CalendarOff, CheckCircle2, Clock, Plus, Search, Sliders } from 'lucide-vue-next';
 
@@ -71,7 +72,7 @@ const pendingApprovals = ref<LeaveRequestDto[]>([]);
 const pendingLoading = ref(false);
 
 const fetchPendingApprovals = async () => {
-  if (!authStore.isAdmin) return;
+  if (!authStore.canApproveRequests) return;
   pendingLoading.value = true;
   try {
     const res = await leaveApi.getPendingApprovals(1, 20);
@@ -128,7 +129,7 @@ const requestForm = reactive<AddLeaveRequestDto>({
 
 const loadEmployees = async () => {
   try {
-    if (authStore.isAdmin) {
+    if (authStore.canManageHR) {
       const res = await employeeApi.getAll();
       if (res.isSuccess && res.data?.items) {
         employees.value = res.data.items;
@@ -179,7 +180,7 @@ const handleCreateRequest = async () => {
   }
 };
 
-// Quota adjustment modal (Admin only)
+// Quota adjustment modal (Admin / HRManager only)
 const showQuotaModal = ref(false);
 const quotaLoading = ref(false);
 const quotaForm = reactive<UpdateLeaveBalanceDto>({
@@ -230,7 +231,7 @@ watch(activeTab, (tab) => {
 onMounted(() => {
   loadMyBalance();
   fetchRequests();
-  if (authStore.isAdmin) {
+  if (authStore.canApproveRequests) {
     fetchPendingApprovals();
   }
 });
@@ -252,7 +253,7 @@ onMounted(() => {
 
       <div class="flex items-center gap-2.5">
         <button
-          v-if="authStore.isAdmin"
+          v-if="authStore.isAdmin || authStore.isHRManager"
           @click="openQuotaModal"
           class="inline-flex items-center gap-2 px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold shadow-2xs transition-colors"
         >
@@ -273,7 +274,10 @@ onMounted(() => {
     <!-- Personal Leave Balance KPI Cards -->
     <LeaveBalanceCards :balance="myBalance" />
 
-    <!-- Consolidated Tabs & Search Toolbar -->
+    <!-- Overtime (OT) Registration & Approval Section -->
+    <OvertimeSection />
+
+    <!-- Consolidated Leave Tabs & Search Toolbar -->
     <div class="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
       <div class="flex items-center p-1 bg-slate-200/80 rounded-xl text-xs sm:text-sm font-semibold w-full sm:w-auto">
         <button
@@ -288,7 +292,7 @@ onMounted(() => {
         </button>
 
         <button
-          v-if="authStore.isAdmin"
+          v-if="authStore.canApproveRequests"
           @click="activeTab = 'approvals'"
           :class="[
             'flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all',
@@ -300,7 +304,7 @@ onMounted(() => {
         </button>
 
         <button
-          v-if="authStore.canManagePayroll"
+          v-if="authStore.canManagePayroll || authStore.canManageHR"
           @click="activeTab = 'all'"
           :class="[
             'flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all',

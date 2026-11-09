@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
-import { useAuthStore } from '@/stores/auth';
 import { useToastStore } from '@/stores/toast';
 import { useI18n } from '@/locales';
 import { roleApi } from '@/api/role.api';
@@ -18,9 +17,10 @@ import {
   Users,
 } from 'lucide-vue-next';
 
-const authStore = useAuthStore();
 const toastStore = useToastStore();
 const { t } = useI18n();
+
+const coreRoles = ['Admin', 'HRManager', 'HRStaff', 'Accountant', 'DepartmentManager', 'Employee'];
 
 const roles = ref<IdentityRole[]>([]);
 const users = ref<UserInfoDto[]>([]);
@@ -50,6 +50,53 @@ const loadData = async () => {
 onMounted(() => {
   loadData();
 });
+
+const getRoleBadgeInfo = (roleName?: string) => {
+  switch (roleName) {
+    case 'Admin':
+      return {
+        label: t('s_role_admin'),
+        desc: t('l_full_access_badge'),
+        badgeClass: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+        pillClass: 'bg-indigo-100 text-indigo-700',
+      };
+    case 'HRManager':
+      return {
+        label: t('s_role_hr_manager'),
+        desc: t('l_hr_manager_access_badge'),
+        badgeClass: 'bg-violet-50 text-violet-700 border-violet-200',
+        pillClass: 'bg-violet-100 text-violet-700',
+      };
+    case 'HRStaff':
+      return {
+        label: t('s_role_hr_staff'),
+        desc: t('l_hr_staff_access_badge'),
+        badgeClass: 'bg-cyan-50 text-cyan-700 border-cyan-200',
+        pillClass: 'bg-cyan-100 text-cyan-700',
+      };
+    case 'Accountant':
+      return {
+        label: t('s_role_accountant'),
+        desc: t('l_accountant_access_badge'),
+        badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+        pillClass: 'bg-emerald-100 text-emerald-700',
+      };
+    case 'DepartmentManager':
+      return {
+        label: t('s_role_department_manager'),
+        desc: t('l_dept_manager_access_badge'),
+        badgeClass: 'bg-amber-50 text-amber-700 border-amber-200',
+        pillClass: 'bg-amber-100 text-amber-700',
+      };
+    default:
+      return {
+        label: t('s_role_employee'),
+        desc: t('l_employee_access_badge'),
+        badgeClass: 'bg-sky-50 text-sky-700 border-sky-200',
+        pillClass: 'bg-sky-100 text-sky-700',
+      };
+  }
+};
 
 // Create Role Modal
 const showCreateRoleModal = ref(false);
@@ -204,21 +251,18 @@ const handleAssignClaim = async () => {
             :key="r.id"
             class="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between"
           >
-            <div class="flex flex-wrap items-center gap-2">
-              <span class="font-bold text-slate-800 text-xs sm:text-sm">{{ r.name }}</span>
-              <span v-if="r.name === 'Admin'" class="text-xs bg-indigo-100 text-indigo-700 font-semibold px-2 py-0.5 rounded-lg">
-                {{ t('l_full_access_badge') }}
-              </span>
-              <span v-else-if="r.name === 'Accountant'" class="text-xs bg-emerald-100 text-emerald-700 font-semibold px-2 py-0.5 rounded-lg">
-                {{ t('l_accountant_access_badge') }}
-              </span>
-              <span v-else-if="r.name === 'Employee'" class="text-xs bg-sky-100 text-sky-700 font-semibold px-2 py-0.5 rounded-lg">
-                {{ t('l_employee_access_badge') }}
-              </span>
+            <div class="flex flex-col gap-1">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="font-bold text-slate-800 text-xs sm:text-sm">{{ r.name }}</span>
+                <span :class="['text-[11px] font-semibold px-2 py-0.5 rounded-lg', getRoleBadgeInfo(r.name).pillClass]">
+                  {{ getRoleBadgeInfo(r.name).label }}
+                </span>
+              </div>
+              <span class="text-[11px] text-slate-500">{{ getRoleBadgeInfo(r.name).desc }}</span>
             </div>
 
             <button
-              v-if="!['Admin', 'Accountant', 'Employee'].includes(r.name)"
+              v-if="!coreRoles.includes(r.name)"
               @click="confirmDeleteRole(r.name)"
               class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg transition-colors"
               :title="t('l_delete_this_role')"
@@ -239,7 +283,7 @@ const handleAssignClaim = async () => {
           <span class="text-xs sm:text-sm text-slate-500 font-medium">{{ users.length }} {{ t('l_accounts_unit') }}</span>
         </div>
 
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto" tabindex="0" role="region" :aria-label="t('l_users_accounts_title')">
           <table class="w-full text-left border-collapse text-xs sm:text-sm">
             <thead class="bg-slate-50/90 border-b border-slate-200/80 text-slate-500 font-semibold uppercase tracking-wider text-[11px]">
               <tr>
@@ -269,20 +313,10 @@ const handleAssignClaim = async () => {
                   <span
                     :class="[
                       'px-2.5 py-1 rounded-lg text-xs font-semibold border',
-                      u.role === 'Admin'
-                        ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
-                        : u.role === 'Accountant'
-                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                          : 'bg-sky-50 text-sky-700 border-sky-200',
+                      getRoleBadgeInfo(u.role).badgeClass,
                     ]"
                   >
-                    {{
-                      u.role === 'Admin'
-                        ? t('s_role_admin')
-                        : u.role === 'Accountant'
-                          ? t('s_role_accountant')
-                          : t('s_role_employee')
-                    }}
+                    {{ getRoleBadgeInfo(u.role).label }}
                   </span>
                 </td>
                 <td class="py-3 px-4 text-right">

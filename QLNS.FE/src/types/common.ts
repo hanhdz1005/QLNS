@@ -6,6 +6,8 @@ export interface ApiResponse<T> {
   errors?: string[];
 }
 
+export type ApiResult<T> = ApiResponse<T>;
+
 export interface PagedResult<T> {
   pageIndex: number;
   pageSize: number;

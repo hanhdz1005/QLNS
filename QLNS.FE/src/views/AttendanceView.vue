@@ -22,7 +22,7 @@ const toastStore = useToastStore();
 const { t } = useI18n();
 
 const activeTab = ref<'kiosk' | 'records' | 'my-attendance'>(
-  authStore.isEmployee ? 'kiosk' : 'records'
+  authStore.canViewAttendanceRecords ? 'records' : 'kiosk'
 );
 const showUpdateFaceModal = ref(false);
 
@@ -188,8 +188,8 @@ watch(activeTab, (tab) => {
 });
 
 onMounted(async () => {
-  if (authStore.canManagePayroll) {
-    if (authStore.isAdmin) {
+  if (authStore.canViewAttendanceRecords) {
+    if (authStore.canManageHR) {
       await loadEmployees();
     }
     fetchRecords();
@@ -214,7 +214,7 @@ onMounted(async () => {
       <!-- Navigation Tabs -->
       <div class="flex items-center p-1 bg-slate-200/80 rounded-xl text-xs sm:text-sm font-semibold">
         <button
-          v-if="authStore.canManagePayroll"
+          v-if="authStore.canViewAttendanceRecords"
           @click="activeTab = 'records'"
           :class="[
             'flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all',
@@ -264,7 +264,7 @@ onMounted(async () => {
         </div>
 
         <button
-          v-if="authStore.isAdmin"
+          v-if="authStore.canManageHR"
           @click="openAddModal"
           class="inline-flex items-center gap-2 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-md shadow-indigo-600/20 transition-colors w-full sm:w-auto justify-center"
         >
@@ -277,7 +277,7 @@ onMounted(async () => {
         <AttendanceRecordsTable
           :records="attendanceList"
           :loading="loading"
-          :is-admin="authStore.isAdmin"
+          :is-admin="authStore.canManageHR"
           @edit="openEditModal"
           @delete="confirmDelete"
         />
@@ -295,7 +295,7 @@ onMounted(async () => {
     <!-- Tab 2: Face Recognition Attendance -->
     <div v-else-if="activeTab === 'kiosk'" class="py-2 flex items-center justify-center">
       <AttendanceFaceScanner
-        @record-updated="() => { if (authStore.canManagePayroll) fetchRecords(); }"
+        @record-updated="() => { if (authStore.canViewAttendanceRecords) fetchRecords(); }"
         @open-update-face="showUpdateFaceModal = true"
       />
     </div>

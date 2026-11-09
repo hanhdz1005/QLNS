@@ -511,4 +511,4 @@ C:\Users\hzkil\AppData\Local\Temp\qlns_rbac_build\QLNS.API.deps.json
 C:\Users\hzkil\AppData\Local\Temp\qlns_rbac_build\QLNS.API.runtimeconfig.json
 C:\Users\hzkil\AppData\Local\Temp\qlns_rbac_build\QLNS.API.dll
 C:\Users\hzkil\AppData\Local\Temp\qlns_rbac_build\QLNS.API.pdb
-D:\Blazor study\QLNS\QLNS\QLNS.API\QLNS.API\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
+D:\Blazor study\QLNS\QLNS\QLNS.API\QLNS.API\bin\Debug\net8.0\QLNS.API.staticwebassets.runtime.json

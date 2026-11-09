@@ -3,6 +3,15 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import LoginView from '@/views/LoginView.vue';
 import { normalizeAppRole, type AppRole } from '@/stores/auth';
 
+const allRoles: AppRole[] = [
+  'Admin',
+  'HRManager',
+  'HRStaff',
+  'Accountant',
+  'DepartmentManager',
+  'Employee',
+];
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -22,8 +31,26 @@ const router = createRouter({
           name: 'dashboard',
           component: () => import('@/views/DashboardView.vue'),
           meta: {
-            roles: ['Admin', 'Accountant', 'Employee'] as AppRole[],
+            roles: allRoles,
             title: 'Tổng quan hệ thống',
+          },
+        },
+        {
+          path: 'lifecycle',
+          name: 'lifecycle',
+          component: () => import('@/views/EmployeeLifecycleView.vue'),
+          meta: {
+            roles: allRoles,
+            title: 'Vòng đời Nhân sự',
+          },
+        },
+        {
+          path: 'lifecycle/:id',
+          name: 'lifecycle-detail',
+          component: () => import('@/views/EmployeeLifecycleDetailView.vue'),
+          meta: {
+            roles: ['Admin', 'HRManager', 'HRStaff', 'DepartmentManager'] as AppRole[],
+            title: 'Chi tiết Vòng đời Nhân sự',
           },
         },
         {
@@ -31,7 +58,7 @@ const router = createRouter({
           name: 'employees',
           component: () => import('@/views/EmployeeView.vue'),
           meta: {
-            roles: ['Admin', 'Accountant'] as AppRole[],
+            roles: ['Admin', 'HRManager', 'HRStaff', 'Accountant', 'DepartmentManager'] as AppRole[],
             title: 'Quản lý Nhân sự',
           },
         },
@@ -40,7 +67,7 @@ const router = createRouter({
           name: 'departments',
           component: () => import('@/views/DepartmentView.vue'),
           meta: {
-            roles: ['Admin', 'Accountant'] as AppRole[],
+            roles: ['Admin', 'HRManager', 'HRStaff', 'Accountant'] as AppRole[],
             title: 'Quản lý Phòng ban',
           },
         },
@@ -49,7 +76,7 @@ const router = createRouter({
           name: 'positions',
           component: () => import('@/views/PositionView.vue'),
           meta: {
-            roles: ['Admin', 'Accountant'] as AppRole[],
+            roles: ['Admin', 'HRManager', 'HRStaff', 'Accountant'] as AppRole[],
             title: 'Quản lý Chức vụ',
           },
         },
@@ -58,7 +85,7 @@ const router = createRouter({
           name: 'contracts',
           component: () => import('@/views/ContractView.vue'),
           meta: {
-            roles: ['Admin', 'Accountant'] as AppRole[],
+            roles: ['Admin', 'HRManager', 'HRStaff', 'Accountant'] as AppRole[],
             title: 'Hợp đồng Lao động',
           },
         },
@@ -67,7 +94,7 @@ const router = createRouter({
           name: 'attendance',
           component: () => import('@/views/AttendanceView.vue'),
           meta: {
-            roles: ['Admin', 'Accountant', 'Employee'] as AppRole[],
+            roles: allRoles,
             title: 'Chấm công Face ID',
           },
         },
@@ -76,8 +103,8 @@ const router = createRouter({
           name: 'leaves',
           component: () => import('@/views/LeaveManagementView.vue'),
           meta: {
-            roles: ['Admin', 'Accountant', 'Employee'] as AppRole[],
-            title: 'Quản lý Nghỉ phép',
+            roles: allRoles,
+            title: 'Quản lý Nghỉ phép & Tăng ca',
           },
         },
         {
@@ -85,7 +112,7 @@ const router = createRouter({
           name: 'payroll',
           component: () => import('@/views/PayrollView.vue'),
           meta: {
-            roles: ['Admin', 'Accountant', 'Employee'] as AppRole[],
+            roles: allRoles,
             title: 'Bảng tính lương & Phiếu lương',
           },
         },
@@ -94,7 +121,7 @@ const router = createRouter({
           name: 'salaries',
           component: () => import('@/views/SalaryStructureView.vue'),
           meta: {
-            roles: ['Admin', 'Accountant'] as AppRole[],
+            roles: ['Admin', 'HRManager', 'Accountant'] as AppRole[],
             title: 'Mức lương cơ sở',
           },
         },
@@ -103,7 +130,7 @@ const router = createRouter({
           name: 'bonus-penalty',
           component: () => import('@/views/BonusPenaltyView.vue'),
           meta: {
-            roles: ['Admin', 'Accountant'] as AppRole[],
+            roles: ['Admin', 'HRManager', 'HRStaff', 'Accountant'] as AppRole[],
             title: 'Khen thưởng & Kỷ luật',
           },
         },
@@ -112,7 +139,7 @@ const router = createRouter({
           name: 'reports',
           component: () => import('@/views/ReportView.vue'),
           meta: {
-            roles: ['Admin', 'Accountant'] as AppRole[],
+            roles: ['Admin', 'HRManager', 'HRStaff', 'Accountant', 'DepartmentManager'] as AppRole[],
             title: 'Báo cáo & Thống kê',
           },
         },
@@ -130,7 +157,7 @@ const router = createRouter({
           name: 'profile',
           component: () => import('@/views/ProfileView.vue'),
           meta: {
-            roles: ['Admin', 'Accountant', 'Employee'] as AppRole[],
+            roles: allRoles,
             title: 'Hồ sơ cá nhân',
           },
         },

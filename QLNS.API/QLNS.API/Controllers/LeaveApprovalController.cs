@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace QLNS.API.Controllers
 {
-    [Authorize(Roles = QLNS.Core.Common.RoleConstants.Admin)]
+    [Authorize(Roles = QLNS.Core.Common.RoleConstants.ApproverRoles)]
     [Route("api/[controller]")]
     [ApiController]
     public class LeaveApprovalController : ControllerBase

@@ -4,12 +4,21 @@ import { authApi } from '@/api/auth.api';
 import type { LoginDto, RegisterDto, GetCurrentUserDto } from '@/types';
 import router from '@/router';
 
-export type AppRole = 'Admin' | 'Accountant' | 'Employee';
+export type AppRole =
+  | 'Admin'
+  | 'HRManager'
+  | 'HRStaff'
+  | 'Accountant'
+  | 'DepartmentManager'
+  | 'Employee';
 
 export function normalizeAppRole(rawRole?: string | null): AppRole {
   const lower = (rawRole || '').trim().toLowerCase();
   if (lower === 'admin') return 'Admin';
+  if (lower === 'hrmanager' || lower === 'hr manager' || lower === 'trưởng phòng nhân sự') return 'HRManager';
+  if (lower === 'hrstaff' || lower === 'hr staff' || lower === 'chuyên viên nhân sự') return 'HRStaff';
   if (lower === 'accountant' || lower === 'kế toán' || lower === 'ke toan') return 'Accountant';
+  if (lower === 'departmentmanager' || lower === 'department manager' || lower === 'trưởng bộ phận') return 'DepartmentManager';
   return 'Employee';
 }
 
@@ -30,9 +39,30 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => !!token.value);
   const normalizedRole = computed<AppRole>(() => normalizeAppRole(user.value?.role));
   const isAdmin = computed(() => normalizedRole.value === 'Admin');
+  const isHRManager = computed(() => normalizedRole.value === 'HRManager');
+  const isHRStaff = computed(() => normalizedRole.value === 'HRStaff');
   const isAccountant = computed(() => normalizedRole.value === 'Accountant');
+  const isDepartmentManager = computed(() => normalizedRole.value === 'DepartmentManager');
   const isEmployee = computed(() => normalizedRole.value === 'Employee');
-  const canManagePayroll = computed(() => isAdmin.value || isAccountant.value);
+
+  const canManageHR = computed(() => isAdmin.value || isHRManager.value || isHRStaff.value);
+  const canViewAllLifecycles = computed(
+    () => isAdmin.value || isHRManager.value || isHRStaff.value || isDepartmentManager.value
+  );
+  const canApproveRequests = computed(
+    () => isAdmin.value || isHRManager.value || isDepartmentManager.value
+  );
+  const canManagePayroll = computed(
+    () => isAdmin.value || isHRManager.value || isAccountant.value
+  );
+  const canViewAttendanceRecords = computed(
+    () =>
+      isAdmin.value ||
+      isHRManager.value ||
+      isHRStaff.value ||
+      isAccountant.value ||
+      isDepartmentManager.value
+  );
 
   const hasAnyRole = (roles?: AppRole[]) => {
     if (!roles || roles.length === 0) return true;
@@ -133,9 +163,16 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     normalizedRole,
     isAdmin,
+    isHRManager,
+    isHRStaff,
     isAccountant,
+    isDepartmentManager,
     isEmployee,
+    canManageHR,
+    canViewAllLifecycles,
+    canApproveRequests,
     canManagePayroll,
+    canViewAttendanceRecords,
     hasAnyRole,
     needsFaceRegistration,
     login,

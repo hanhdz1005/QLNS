@@ -46,10 +46,23 @@ export const status = {
   s_penalty: 'Disciplinary Penalty',
   s_unknown: 'Unknown',
 
-  // Core Roles
-  s_role_admin: 'Administrator (Admin)',
-  s_role_accountant: 'Accountant',
+  // 6-Tier Enterprise Roles
+  s_role_admin: 'System Administrator (Admin)',
+  s_role_hr_manager: 'HR Manager',
+  s_role_hr_staff: 'HR Specialist (HR Staff)',
+  s_role_accountant: 'Payroll Accountant',
+  s_role_department_manager: 'Department Manager',
   s_role_employee: 'Employee',
+
+  l_hr_manager_access_badge: 'HR Management & Approvals',
+  l_hr_staff_access_badge: 'HR Records & Contracts',
   l_accountant_access_badge: 'Payroll & Finance',
+  l_dept_manager_access_badge: 'OT/Leave Approvals & Team',
   l_employee_access_badge: 'Self-Service',
+
+  // Lifecycle Stages
+  s_stage_internship: 'Internship',
+  s_stage_probation: 'Probation',
+  s_stage_official: 'Official Staff',
+  s_stage_resigned: 'Resigned',
 };

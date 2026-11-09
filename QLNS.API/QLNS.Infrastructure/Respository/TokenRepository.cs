@@ -33,9 +33,7 @@ namespace QLNS.Infrastructure.Respository
 
         public string CreateToken(AppUser appUser)
         {
-            var role = string.IsNullOrWhiteSpace(appUser.Role) || appUser.Role == "User" || appUser.Role == "Leader"
-                ? RoleConstants.Employee
-                : appUser.Role;
+            var role = QLNS.Infrastructure.Data.Config.IdentitySeed.NormalizeRoleName(appUser.Role);
 
             var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha256);
             var claims = new List<Claim>

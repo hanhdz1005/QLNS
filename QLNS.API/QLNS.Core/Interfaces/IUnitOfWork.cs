@@ -14,5 +14,6 @@ namespace QLNS.Core.Interfaces
         IReportRepository ReportRepository { get; }
         IContractRepository ContractRepository { get; }
         ILeaveBalanceRepository LeaveBalanceRepository { get; }
+        IOvertimeRequestRepository OvertimeRequestRepository { get; }
     }
 }

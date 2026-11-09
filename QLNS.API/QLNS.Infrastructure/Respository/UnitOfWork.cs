@@ -1,9 +1,4 @@
 using QLNS.Core.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QLNS.Infrastructure.Respository
 {
@@ -19,6 +14,7 @@ namespace QLNS.Infrastructure.Respository
         public IReportRepository ReportRepository { get; }
         public IContractRepository ContractRepository { get; }
         public ILeaveBalanceRepository LeaveBalanceRepository { get; }
+        public IOvertimeRequestRepository OvertimeRequestRepository { get; }
 
         public UnitOfWork(AppDbContext context)
         {
@@ -32,6 +28,7 @@ namespace QLNS.Infrastructure.Respository
             ReportRepository = new ReportRepository(context);
             ContractRepository = new ContractRepository(context);
             LeaveBalanceRepository = new LeaveBalanceRepository(context);
+            OvertimeRequestRepository = new OvertimeRequestRepository(context);
         }
     }
 }

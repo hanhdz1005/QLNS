@@ -13,7 +13,10 @@ namespace QLNS.Core.Dto
         public DateOnly Date { get; set; }
         public TimeSpan? CheckIn { get; set; }
         public TimeSpan? CheckOut { get; set; }
+        public decimal? RegularHours { get; set; }
+        public decimal? OvertimeHours { get; set; }
         public decimal? HoursWorked { get; set; }
+        public int ScanCount { get; set; } = 1;
         public AttendanceStatus Status { get; set; }
         public string? FaceSnapshotUrl { get; set; }
         public decimal? SimilarityScore { get; set; }
@@ -55,7 +58,12 @@ namespace QLNS.Core.Dto
         public string EmployeeName { get; set; } = string.Empty;
         public DateOnly Date { get; set; }
         public TimeSpan Time { get; set; }
+        public TimeSpan? FirstCheckIn { get; set; }
+        public TimeSpan? LastCheckOut { get; set; }
+        public decimal? RegularHours { get; set; }
+        public decimal? OvertimeHours { get; set; }
         public decimal? HoursWorked { get; set; }
+        public int ScanCount { get; set; } = 1;
         public decimal? SimilarityScore { get; set; }
         public string? SnapshotUrl { get; set; }
     }

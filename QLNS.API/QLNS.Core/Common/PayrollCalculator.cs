@@ -94,7 +94,51 @@ namespace QLNS.Core.Common
         }
 
         /// <summary>
-        /// Phân tích dữ liệu chấm công: số ngày công thực tế, giờ OT và tiền OT (150%).
+        /// Tính giờ công hành chính chuẩn (tối đa 8.0h/ngày trong khung 08:00-12:00 & 13:00-17:30)
+        /// và chỉ cộng đúng số giờ OT đã đăng ký & được phê duyệt (approvedOtHours).
+        /// </summary>
+        public static (decimal RegularHours, decimal OvertimeHours, decimal TotalHours) CalculateDailyWorkingHours(
+            TimeSpan? firstCheckIn,
+            TimeSpan? lastCheckOut,
+            decimal approvedOtHours)
+        {
+            var validOt = Math.Round(Math.Max(0m, approvedOtHours), 2);
+
+            if (!firstCheckIn.HasValue || !lastCheckOut.HasValue || lastCheckOut.Value <= firstCheckIn.Value)
+            {
+                return (0m, validOt, validOt);
+            }
+
+            var inTime = firstCheckIn.Value;
+            var outTime = lastCheckOut.Value;
+
+            // Ân hạn đi làm buổi sáng đến 08:30 vẫn tính mốc bắt đầu hành chính từ 08:00
+            var effectiveIn = inTime <= new TimeSpan(8, 30, 0) && outTime >= new TimeSpan(9, 0, 0)
+                ? new TimeSpan(8, 0, 0)
+                : inTime;
+
+            // Ca sáng: 08:00 - 12:00
+            var morningStart = new TimeSpan(8, 0, 0);
+            var morningEnd = new TimeSpan(12, 0, 0);
+            var mIn = effectiveIn > morningStart ? effectiveIn : morningStart;
+            var mOut = outTime < morningEnd ? outTime : morningEnd;
+            var morningHours = mOut > mIn ? (decimal)(mOut - mIn).TotalHours : 0m;
+
+            // Ca chiều: 13:00 - 17:30
+            var afternoonStart = new TimeSpan(13, 0, 0);
+            var afternoonEnd = new TimeSpan(17, 30, 0);
+            var aIn = effectiveIn > afternoonStart ? effectiveIn : afternoonStart;
+            var aOut = outTime < afternoonEnd ? outTime : afternoonEnd;
+            var afternoonHours = aOut > aIn ? (decimal)(aOut - aIn).TotalHours : 0m;
+
+            var regularHours = Math.Min(8.0m, Math.Round(morningHours + afternoonHours, 2));
+            var totalHours = Math.Round(regularHours + validOt, 2);
+
+            return (regularHours, validOt, totalHours);
+        }
+
+        /// <summary>
+        /// Phân tích dữ liệu chấm công: số ngày công hành chính thực tế, giờ OT đã duyệt và tiền OT (150%).
         /// </summary>
         public static (decimal ActualWorkDays, decimal OtHours, decimal OtPay) CalculateAttendanceDetails(
             IEnumerable<Attendance> attendances,
@@ -110,26 +154,30 @@ namespace QLNS.Core.Common
 
             foreach (var att in attendances)
             {
+                // Chỉ cộng đúng số giờ OT đã đăng ký và được phê duyệt (lưu tại OvertimeHours)
+                if (att.OvertimeHours.HasValue && att.OvertimeHours.Value > 0)
+                {
+                    totalOtHours += att.OvertimeHours.Value;
+                }
+
+                var regHours = att.RegularHours ?? (att.HoursWorked.HasValue ? Math.Min(8.0m, att.HoursWorked.Value) : 0m);
+
                 switch (att.Status)
                 {
                     case AttendanceStatus.Present:
                     case AttendanceStatus.WorkFromHome:
-                        if (att.HoursWorked.HasValue && att.HoursWorked.Value > 0)
+                        if (regHours > 0)
                         {
-                            if (att.HoursWorked.Value >= 7.5m)
+                            if (regHours >= 7.0m)
                             {
                                 actualWorkDays += 1.0m;
-                                if (att.HoursWorked.Value > 8.0m)
-                                {
-                                    totalOtHours += (att.HoursWorked.Value - 8.0m);
-                                }
                             }
-                            else if (att.HoursWorked.Value >= 4.0m)
+                            else if (regHours >= 3.5m)
                             {
                                 actualWorkDays += 0.5m;
                             }
                         }
-                        else
+                        else if (!att.RegularHours.HasValue && (!att.HoursWorked.HasValue || att.HoursWorked.Value == 0))
                         {
                             actualWorkDays += 1.0m;
                         }
@@ -137,14 +185,14 @@ namespace QLNS.Core.Common
 
                     case AttendanceStatus.Late:
                     case AttendanceStatus.EarlyLeave:
-                        if (att.HoursWorked.HasValue && att.HoursWorked.Value > 0)
+                        if (regHours > 0)
                         {
-                            if (att.HoursWorked.Value >= 7.0m)
+                            if (regHours >= 6.5m)
                                 actualWorkDays += 1.0m;
-                            else if (att.HoursWorked.Value >= 4.0m)
+                            else if (regHours >= 3.5m)
                                 actualWorkDays += 0.5m;
                         }
-                        else
+                        else if (!att.RegularHours.HasValue && (!att.HoursWorked.HasValue || att.HoursWorked.Value == 0))
                         {
                             actualWorkDays += 1.0m;
                         }
@@ -157,7 +205,7 @@ namespace QLNS.Core.Common
                 }
             }
 
-            // Tiền làm thêm giờ = Số giờ OT * Đơn giá giờ * Hệ số 1.5 (ngày thường)
+            // Tiền làm thêm giờ = Số giờ OT đã đăng ký & duyệt * Đơn giá giờ * Hệ số 1.5 (ngày thường)
             var otPay = Math.Round(totalOtHours * hourlyRate * 1.5m, 0);
 
             return (actualWorkDays, totalOtHours, otPay);

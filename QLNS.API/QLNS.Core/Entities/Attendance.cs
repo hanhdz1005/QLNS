@@ -15,10 +15,21 @@ namespace QLNSCore.Entities
         public DateOnly Date { get; set; }
         public TimeSpan? CheckIn { get; set; }
         public TimeSpan? CheckOut { get; set; }
+
+        [Column(TypeName = "decimal(5,2)")]
+        public decimal? RegularHours { get; set; }
+
+        [Column(TypeName = "decimal(5,2)")]
+        public decimal? OvertimeHours { get; set; }
+
         [Column(TypeName = "decimal(5,2)")]
         public decimal? HoursWorked { get; set; }
+
+        public int ScanCount { get; set; } = 1;
+
         public AttendanceStatus Status { get; set; }
         public string? FaceSnapshotUrl { get; set; }
+
         [Column(TypeName = "decimal(5,2)")]
         public decimal? SimilarityScore { get; set; }
     }

@@ -97,9 +97,7 @@ namespace QLNS.API.Controllers
             bool hasRegisteredFace = !string.IsNullOrWhiteSpace(user.FaceEmbedding)
                 || !string.IsNullOrWhiteSpace(employee?.FaceEmbedding);
 
-            var normalizedRole = string.IsNullOrWhiteSpace(user.Role) || user.Role == "User" || user.Role == "Leader"
-                ? QLNS.Core.Common.RoleConstants.Employee
-                : user.Role;
+            var normalizedRole = QLNS.Infrastructure.Data.Config.IdentitySeed.NormalizeRoleName(user.Role);
 
             var data = new GetCurrentUserDto
             {

@@ -25,6 +25,14 @@ namespace QLNS.Core.Services
             _cache = cache;
         }
 
+        private async Task<decimal> GetApprovedOtHoursAsync(Guid employeeId, DateOnly date)
+        {
+            return await _uow.OvertimeRequestRepository
+                .Query()
+                .Where(o => o.EmployeeId == employeeId && o.Date == date && o.Status == OvertimeStatus.Approved)
+                .SumAsync(o => (decimal?)o.RegisteredHours) ?? 0m;
+        }
+
         public async Task<IEnumerable<AttendanceDto>> GetAllAsync()
         {
             var items = await _uow.AttendanceRepository
@@ -70,10 +78,16 @@ namespace QLNS.Core.Services
             if (employee == null)
                 throw new KeyNotFoundException("Employee not found");
 
+            var approvedOt = await GetApprovedOtHoursAsync(dto.EmployeeId, dto.Date);
+            var (regHours, otHours, totalHours) = PayrollCalculator.CalculateDailyWorkingHours(dto.CheckIn, dto.CheckOut, approvedOt);
+
             var entity = _mapper.Map<Attendance>(dto);
             entity.EmployeeName = employee.FullName;
-            if (entity.CheckIn.HasValue && entity.CheckOut.HasValue)
-                entity.HoursWorked = (decimal)(entity.CheckOut.Value - entity.CheckIn.Value).TotalHours;
+            entity.RegularHours = regHours;
+            entity.OvertimeHours = otHours;
+            entity.HoursWorked = totalHours;
+            entity.ScanCount = dto.CheckOut.HasValue ? 2 : 1;
+
             await _uow.AttendanceRepository.AddAsync(entity);
             return _mapper.Map<AttendanceDto>(entity);
         }
@@ -88,11 +102,17 @@ namespace QLNS.Core.Services
             if (employee == null)
                 throw new KeyNotFoundException("Employee not found");
 
+            var approvedOt = await GetApprovedOtHoursAsync(dto.EmployeeId, dto.Date);
+            var (regHours, otHours, totalHours) = PayrollCalculator.CalculateDailyWorkingHours(dto.CheckIn, dto.CheckOut, approvedOt);
+
             var entity = _mapper.Map<Attendance>(dto);
             entity.EmployeeName = employee.FullName;
-            if (entity.CheckIn.HasValue && entity.CheckOut.HasValue)
-                entity.HoursWorked = (decimal)(entity.CheckOut.Value - entity.CheckIn.Value).TotalHours;
+            entity.RegularHours = regHours;
+            entity.OvertimeHours = otHours;
+            entity.HoursWorked = totalHours;
+            entity.ScanCount = Math.Max(1, exist.ScanCount);
             entity.Id = id;
+
             await _uow.AttendanceRepository.UpdateAsync(id, entity);
             return _mapper.Map<AttendanceDto>(entity);
         }
@@ -113,7 +133,7 @@ namespace QLNS.Core.Services
         {
             if (!FaceRecognitionHelper.IsValidDescriptor(dto.FaceDescriptor))
             {
-                return (false, "Không trích xuất được đặc điểm khuôn mặt hợp lệ. Vui lòng chụp rõ khuôn mặt.", "FACE_NOT_DETECTED", null);
+                return (false, "Không trích xuất được đặc điểm khuôn mặt hợp lệ. Vui lòng giữ khuôn mặt rõ nét.", "FACE_NOT_DETECTED", null);
             }
 
             var serializedDescriptor = FaceRecognitionHelper.SerializeDescriptor(dto.FaceDescriptor);
@@ -132,7 +152,7 @@ namespace QLNS.Core.Services
             return (true, "Đăng ký nhận diện khuôn mặt thành công.", null, imageUrl);
         }
 
-        // B3 & B4: Đối sánh khuôn mặt gửi lên với dữ liệu DB và ghi nhận chấm công
+        // B3 & B4: Đối sánh khuôn mặt gửi lên với dữ liệu DB và ghi nhận chấm công (First-In / Last-Out)
         public async Task<FaceCheckInResultDto> FaceCheckInAsync(
             string userIdentifier,
             FaceCheckInDto dto,
@@ -145,7 +165,7 @@ namespace QLNS.Core.Services
                     Success = false,
                     ActionType = "Unknown",
                     ErrorCode = "FACE_NOT_DETECTED",
-                    Message = "Không phát hiện được khuôn mặt hợp lệ trong khung hình chụp."
+                    Message = "Không phát hiện được khuôn mặt hợp lệ trong khung hình quét."
                 };
             }
 
@@ -210,6 +230,8 @@ namespace QLNS.Core.Services
             var nowTime = DateTime.Now.TimeOfDay;
             nowTime = new TimeSpan(nowTime.Hours, nowTime.Minutes, nowTime.Seconds);
 
+            var approvedOtHours = await GetApprovedOtHoursAsync(employee.Id, today);
+
             var existingAttendance = await _uow.AttendanceRepository.Query()
                 .FirstOrDefaultAsync(a => a.EmployeeId == employee.Id && a.Date == today);
 
@@ -224,7 +246,10 @@ namespace QLNS.Core.Services
                     Date = today,
                     CheckIn = nowTime,
                     CheckOut = null,
-                    HoursWorked = 0,
+                    RegularHours = 0m,
+                    OvertimeHours = approvedOtHours,
+                    HoursWorked = approvedOtHours,
+                    ScanCount = 1,
                     Status = isLate ? AttendanceStatus.Late : AttendanceStatus.Present,
                     FaceSnapshotUrl = snapshotUrl,
                     SimilarityScore = similarityPercent
@@ -237,24 +262,40 @@ namespace QLNS.Core.Services
                     Success = true,
                     ActionType = "CheckIn",
                     Message = isLate
-                        ? $"Điểm danh khuôn mặt VÀO thành công lúc {nowTime:hh\\:mm\\:ss} (Muộn hơn 08:30 - Khớp {similarityPercent}%)."
-                        : $"Điểm danh khuôn mặt VÀO thành công lúc {nowTime:hh\\:mm\\:ss} (Khớp {similarityPercent}%).",
+                        ? $"Chấm công lần đầu (VÀO) lúc {nowTime:hh\\:mm\\:ss} (Muộn sau 08:30 - Khớp {similarityPercent}%)."
+                        : $"Chấm công lần đầu (VÀO) lúc {nowTime:hh\\:mm\\:ss} (Đúng giờ - Khớp {similarityPercent}%).",
                     EmployeeName = employee.FullName,
                     Date = today,
                     Time = nowTime,
-                    HoursWorked = 0,
+                    FirstCheckIn = nowTime,
+                    LastCheckOut = null,
+                    RegularHours = 0m,
+                    OvertimeHours = approvedOtHours,
+                    HoursWorked = approvedOtHours,
+                    ScanCount = 1,
                     SimilarityScore = similarityPercent,
                     SnapshotUrl = snapshotUrl
                 };
             }
             else
             {
-                existingAttendance.CheckOut = nowTime;
-                if (existingAttendance.CheckIn.HasValue)
+                // Giữ nguyên lần quét đầu tiên làm CheckIn, chỉ cập nhật lần quét cuối cùng làm CheckOut
+                if (!existingAttendance.CheckIn.HasValue)
                 {
-                    var worked = (decimal)(nowTime - existingAttendance.CheckIn.Value).TotalHours;
-                    existingAttendance.HoursWorked = worked > 0 ? Math.Round(worked, 2) : 0;
+                    existingAttendance.CheckIn = nowTime;
                 }
+                existingAttendance.CheckOut = nowTime;
+                existingAttendance.ScanCount = Math.Max(1, existingAttendance.ScanCount) + 1;
+
+                var (regHours, otHours, totalHours) = PayrollCalculator.CalculateDailyWorkingHours(
+                    existingAttendance.CheckIn,
+                    existingAttendance.CheckOut,
+                    approvedOtHours);
+
+                existingAttendance.RegularHours = regHours;
+                existingAttendance.OvertimeHours = otHours;
+                existingAttendance.HoursWorked = totalHours;
+
                 if (!string.IsNullOrEmpty(snapshotUrl))
                 {
                     existingAttendance.FaceSnapshotUrl = snapshotUrl;
@@ -267,18 +308,22 @@ namespace QLNS.Core.Services
                 {
                     Success = true,
                     ActionType = "CheckOut",
-                    Message = $"Điểm danh khuôn mặt RA thành công lúc {nowTime:hh\\:mm\\:ss}. Tổng giờ: {existingAttendance.HoursWorked:F2}h (Khớp {similarityPercent}%).",
+                    Message = $"Cập nhật chấm công lần cuối (#{existingAttendance.ScanCount}) lúc {nowTime:hh\\:mm\\:ss}. Hành chính: {regHours:F2}h | OT đã duyệt: {otHours:F2}h | Tổng: {totalHours:F2}h.",
                     EmployeeName = employee.FullName,
                     Date = today,
                     Time = nowTime,
-                    HoursWorked = existingAttendance.HoursWorked,
+                    FirstCheckIn = existingAttendance.CheckIn,
+                    LastCheckOut = existingAttendance.CheckOut,
+                    RegularHours = regHours,
+                    OvertimeHours = otHours,
+                    HoursWorked = totalHours,
+                    ScanCount = existingAttendance.ScanCount,
                     SimilarityScore = similarityPercent,
                     SnapshotUrl = snapshotUrl
                 };
             }
         }
 
-        // Legacy QR methods
         public async Task<(string Token, int ExpiresInSeconds)> GenerateQrTokenAsync()
         {
             var token = Guid.NewGuid().ToString("N") + DateTime.UtcNow.Ticks.ToString("x");

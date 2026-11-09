@@ -17,6 +17,7 @@ import {
   ShieldAlert,
   Sliders,
   UserCircle,
+  GitBranchPlus,
   X,
 } from 'lucide-vue-next';
 
@@ -33,10 +34,30 @@ const route = useRoute();
 const authStore = useAuthStore();
 const { t } = useI18n();
 
+const allRoles: AppRole[] = [
+  'Admin',
+  'HRManager',
+  'HRStaff',
+  'Accountant',
+  'DepartmentManager',
+  'Employee',
+];
+
 const roleLabel = computed(() => {
-  if (authStore.isAdmin) return t('s_role_admin');
-  if (authStore.isAccountant) return t('s_role_accountant');
-  return t('s_role_employee');
+  switch (authStore.normalizedRole) {
+    case 'Admin':
+      return t('s_role_admin');
+    case 'HRManager':
+      return t('s_role_hr_manager');
+    case 'HRStaff':
+      return t('s_role_hr_staff');
+    case 'Accountant':
+      return t('s_role_accountant');
+    case 'DepartmentManager':
+      return t('s_role_department_manager');
+    default:
+      return t('s_role_employee');
+  }
 });
 
 const navigation = computed(() => {
@@ -46,27 +67,75 @@ const navigation = computed(() => {
     icon: unknown;
     roles: AppRole[];
   }> = [
-    { name: t('n_dashboard'), path: '/', icon: LayoutDashboard, roles: ['Admin', 'Accountant', 'Employee'] },
-    { name: t('n_employees'), path: '/employees', icon: Users, roles: ['Admin', 'Accountant'] },
-    { name: t('n_departments'), path: '/departments', icon: Building2, roles: ['Admin', 'Accountant'] },
-    { name: t('n_positions'), path: '/positions', icon: Briefcase, roles: ['Admin', 'Accountant'] },
-    { name: t('n_contracts'), path: '/contracts', icon: FileText, roles: ['Admin', 'Accountant'] },
-    { name: t('n_attendance'), path: '/attendance', icon: CalendarCheck2, roles: ['Admin', 'Accountant', 'Employee'] },
-    { name: t('n_leaves'), path: '/leaves', icon: CalendarOff, roles: ['Admin', 'Accountant', 'Employee'] },
+    { name: t('n_dashboard'), path: '/', icon: LayoutDashboard, roles: allRoles },
     {
-      name: authStore.isEmployee ? t('n_my_payslip') : t('n_payroll'),
+      name: authStore.canViewAllLifecycles ? t('n_lifecycle') : t('n_my_lifecycle'),
+      path: '/lifecycle',
+      icon: GitBranchPlus,
+      roles: allRoles,
+    },
+    {
+      name: t('n_employees'),
+      path: '/employees',
+      icon: Users,
+      roles: ['Admin', 'HRManager', 'HRStaff', 'Accountant', 'DepartmentManager'],
+    },
+    {
+      name: t('n_departments'),
+      path: '/departments',
+      icon: Building2,
+      roles: ['Admin', 'HRManager', 'HRStaff', 'Accountant'],
+    },
+    {
+      name: t('n_positions'),
+      path: '/positions',
+      icon: Briefcase,
+      roles: ['Admin', 'HRManager', 'HRStaff', 'Accountant'],
+    },
+    {
+      name: t('n_contracts'),
+      path: '/contracts',
+      icon: FileText,
+      roles: ['Admin', 'HRManager', 'HRStaff', 'Accountant'],
+    },
+    { name: t('n_attendance'), path: '/attendance', icon: CalendarCheck2, roles: allRoles },
+    { name: t('n_leaves'), path: '/leaves', icon: CalendarOff, roles: allRoles },
+    {
+      name: authStore.canManagePayroll ? t('n_payroll') : t('n_my_payslip'),
       path: '/payroll',
       icon: DollarSign,
-      roles: ['Admin', 'Accountant', 'Employee'],
+      roles: allRoles,
     },
-    { name: t('n_salaries'), path: '/salaries', icon: Sliders, roles: ['Admin', 'Accountant'] },
-    { name: t('n_bonus_penalty'), path: '/bonus-penalty', icon: Award, roles: ['Admin', 'Accountant'] },
-    { name: t('n_reports'), path: '/reports', icon: BarChart3, roles: ['Admin', 'Accountant'] },
-    { name: t('n_profile'), path: '/profile', icon: UserCircle, roles: ['Employee'] },
+    {
+      name: t('n_salaries'),
+      path: '/salaries',
+      icon: Sliders,
+      roles: ['Admin', 'HRManager', 'Accountant'],
+    },
+    {
+      name: t('n_bonus_penalty'),
+      path: '/bonus-penalty',
+      icon: Award,
+      roles: ['Admin', 'HRManager', 'HRStaff', 'Accountant'],
+    },
+    {
+      name: t('n_reports'),
+      path: '/reports',
+      icon: BarChart3,
+      roles: ['Admin', 'HRManager', 'HRStaff', 'Accountant', 'DepartmentManager'],
+    },
+    { name: t('n_profile'), path: '/profile', icon: UserCircle, roles: allRoles },
   ];
 
   return items.filter((item) => authStore.hasAnyRole(item.roles));
 });
+
+const isRouteActive = (itemPath: string) => {
+  if (itemPath === '/lifecycle') {
+    return route.path.startsWith('/lifecycle');
+  }
+  return route.path === itemPath;
+};
 </script>
 
 <template>
@@ -112,7 +181,7 @@ const navigation = computed(() => {
         :title="!isOpen ? item.name : undefined"
         :class="[
           'flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all group',
-          route.path === item.path
+          isRouteActive(item.path)
             ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
             : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60',
         ]"
@@ -122,7 +191,7 @@ const navigation = computed(() => {
           :is="item.icon"
           :class="[
             'w-5 h-5 shrink-0 transition-transform group-hover:scale-105',
-            route.path === item.path ? 'text-white' : 'text-slate-400 group-hover:text-indigo-400',
+            isRouteActive(item.path) ? 'text-white' : 'text-slate-400 group-hover:text-indigo-400',
           ]"
         />
         <span v-show="isOpen" class="whitespace-nowrap transition-all duration-200">

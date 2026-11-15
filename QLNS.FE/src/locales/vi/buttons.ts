@@ -16,8 +16,6 @@ export const buttons = {
   b_export_json: 'Xuất JSON',
   b_export_csv_staff: 'Xuất CSV nhân sự',
   b_export_all_staff_csv: 'Xuất toàn bộ DS Nhân sự (CSV)',
-  b_scan_qr: 'Mô Phỏng Quét QR Ngay',
-  b_open_qr_kiosk: 'Mở QR Điểm danh',
   b_logout: 'Đăng xuất hệ thống',
   b_login: 'Đăng nhập',
   b_approve: 'Duyệt đơn',

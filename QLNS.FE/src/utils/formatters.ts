@@ -55,6 +55,16 @@ export const formatDateTime = (val?: string | null): string => {
   }
 };
 
+// Format TimeSpan string (HH:mm:ss -> HH:mm)
+export const formatTime = (val?: string | null): string => {
+  if (!val) return '—';
+  const parts = val.split(':');
+  if (parts.length >= 2) {
+    return `${(parts[0] ?? '00').padStart(2, '0')}:${(parts[1] ?? '00').padStart(2, '0')}`;
+  }
+  return val;
+};
+
 // Enum label helpers (compatible with both JsonStringEnumConverter strings and numeric enum codes)
 export const getGenderLabel = (g?: Gender | number | string): string => {
   const t = getT();

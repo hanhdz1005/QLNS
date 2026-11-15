@@ -161,6 +161,15 @@ const router = createRouter({
             title: 'Hồ sơ cá nhân',
           },
         },
+        {
+          path: 'settings',
+          name: 'company-settings',
+          component: () => import('@/views/CompanySettingsView.vue'),
+          meta: {
+            roles: allRoles,
+            titleKey: 'n_company_settings',
+          },
+        },
       ],
     },
     {

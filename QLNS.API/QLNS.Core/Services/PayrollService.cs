@@ -81,16 +81,23 @@ namespace QLNS.Core.Services
 
             var standardWorkingDays = PayrollCalculator.CalculateStandardWorkingDays(year, month);
 
-            // 1. Dữ liệu chấm công
+            // 1. Dữ liệu chấm công & Đơn OT đã duyệt
             var attendances = await _uow.AttendanceRepository
                 .Query()
                 .Where(a => a.EmployeeId == employeeId && a.Date.Month == month && a.Date.Year == year)
                 .ToListAsync();
 
+            var approvedOts = await _uow.OvertimeRequestRepository
+                .Query()
+                .Where(o => o.EmployeeId == employeeId && o.Date.Month == month && o.Date.Year == year && o.Status == OvertimeStatus.Approved)
+                .ToListAsync();
+
             var (actualWorkDays, otHours, otPay) = PayrollCalculator.CalculateAttendanceDetails(
                 attendances,
                 baseSalary,
-                standardWorkingDays);
+                standardWorkingDays,
+                approvedOts,
+                includeOvertimePay: true);
 
             // 2. Đơn xin nghỉ phép có hưởng lương (Approved)
             var monthStart = new DateOnly(year, month, 1);
@@ -234,6 +241,11 @@ namespace QLNS.Core.Services
                 .Where(a => a.Date.Month == dto.Month && a.Date.Year == dto.Year)
                 .ToListAsync();
 
+            var allApprovedOts = await _uow.OvertimeRequestRepository
+                .Query()
+                .Where(o => o.Date.Month == dto.Month && o.Date.Year == dto.Year && o.Status == OvertimeStatus.Approved)
+                .ToListAsync();
+
             var allApprovedLeaves = await _uow.LeaveRequestRepository
                 .Query()
                 .Where(l => l.Status == LeaveStatus.Approved
@@ -256,10 +268,13 @@ namespace QLNS.Core.Services
                 var allowance = existingSalary?.Allowance ?? 0m;
 
                 var empAttendances = allAttendances.Where(a => a.EmployeeId == employee.Id).ToList();
+                var empOts = allApprovedOts.Where(o => o.EmployeeId == employee.Id).ToList();
                 var (actualWorkDays, otHours, otPay) = PayrollCalculator.CalculateAttendanceDetails(
                     empAttendances,
                     baseSalary,
-                    standardWorkingDays);
+                    standardWorkingDays,
+                    empOts,
+                    dto.IncludeOvertimePay);
 
                 var empLeaves = allApprovedLeaves.Where(l => l.EmployeeId == employee.Id).ToList();
                 var paidLeaveDays = PayrollCalculator.CalculatePaidLeaveDays(empLeaves, dto.Year, dto.Month);

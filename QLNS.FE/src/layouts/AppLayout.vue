@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useAuthStore } from '@/stores/auth';
+import { useCompanySettingsStore } from '@/stores/companySettings';
 import AppSidebar from '@/components/layout/AppSidebar.vue';
 import AppNavbar from '@/components/layout/AppNavbar.vue';
 import FirstTimeFaceModal from '@/views/attendance/components/FirstTimeFaceModal.vue';
 
 const authStore = useAuthStore();
+const settingsStore = useCompanySettingsStore();
 const isSidebarOpen = ref(true);
 const isMobileSidebarOpen = ref(false);
 
@@ -23,7 +25,12 @@ const closeMobileSidebar = () => {
 </script>
 
 <template>
-  <div class="h-screen bg-slate-50 flex flex-col font-sans text-slate-800 overflow-hidden">
+  <div
+    :class="[
+      'h-screen flex flex-col font-sans text-slate-800 overflow-hidden transition-colors duration-300',
+      settingsStore.currentTheme.appBgClass,
+    ]"
+  >
     <FirstTimeFaceModal :show="authStore.needsFaceRegistration" :mandatory="true" />
 
     <!-- Mobile sidebar backdrop -->

@@ -86,6 +86,7 @@ export interface PayrollGenerateDto {
   year: number;
   calculateAttendance?: boolean;
   standardWorkingDays?: number;
+  includeOvertimePay?: boolean;
   includeInsurance?: boolean;
   includeTax?: boolean;
   saveToDatabase?: boolean;

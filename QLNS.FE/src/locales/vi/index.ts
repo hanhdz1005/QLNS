@@ -6,6 +6,7 @@ import { toast } from './toast';
 import { errors } from './errors';
 import { face } from './face';
 import { lifecycle } from './lifecycle';
+import { settings } from './settings';
 
 export const vi = {
   ...navigation,
@@ -16,6 +17,7 @@ export const vi = {
   ...errors,
   ...face,
   ...lifecycle,
+  ...settings,
 };
 
 export type LocaleSchema = typeof vi;

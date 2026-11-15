@@ -9,8 +9,6 @@ import type {
   FaceRegisterResultDto,
   FaceCheckInDto,
   FaceCheckInResultDto,
-  QrTokenDto,
-  QrCheckInResultDto,
 } from '@/types';
 
 export const attendanceApi = {
@@ -64,16 +62,6 @@ export const attendanceApi = {
       errorCode,
       errorDetail,
     });
-    return res.data;
-  },
-
-  getQrToken: async (): Promise<ApiResponse<QrTokenDto>> => {
-    const res = await apiClient.get<ApiResponse<QrTokenDto>>('/Attendance/qr-token');
-    return res.data;
-  },
-
-  qrCheckIn: async (qrToken: string): Promise<ApiResponse<QrCheckInResultDto>> => {
-    const res = await apiClient.post<ApiResponse<QrCheckInResultDto>>('/Attendance/qr-checkin', { qrToken });
     return res.data;
   },
 

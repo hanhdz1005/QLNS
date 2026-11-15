@@ -1,6 +1,5 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
 using QLNS.Core.Common;
 using QLNS.Core.Dto;
 using QLNS.Core.Interfaces.IService;
@@ -16,13 +15,11 @@ namespace QLNS.Core.Services
     {
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
-        private readonly IMemoryCache _cache;
 
-        public AttendanceService(IUnitOfWork uow, IMapper mapper, IMemoryCache cache)
+        public AttendanceService(IUnitOfWork uow, IMapper mapper)
         {
             _uow = uow;
             _mapper = mapper;
-            _cache = cache;
         }
 
         private async Task<decimal> GetApprovedOtHoursAsync(Guid employeeId, DateOnly date)
@@ -322,51 +319,6 @@ namespace QLNS.Core.Services
                     SnapshotUrl = snapshotUrl
                 };
             }
-        }
-
-        public async Task<(string Token, int ExpiresInSeconds)> GenerateQrTokenAsync()
-        {
-            var token = Guid.NewGuid().ToString("N") + DateTime.UtcNow.Ticks.ToString("x");
-            var cacheKey = $"QR_ATTENDANCE_{token}";
-            _cache.Set(cacheKey, true, TimeSpan.FromSeconds(35));
-            return await Task.FromResult((token, 30));
-        }
-
-        public async Task<QrCheckInResultDto> QrCheckInAsync(string qrToken, string userIdentifier)
-        {
-            var cacheKey = $"QR_ATTENDANCE_{qrToken}";
-            if (!_cache.TryGetValue(cacheKey, out _))
-            {
-                return new QrCheckInResultDto
-                {
-                    Success = false,
-                    ActionType = "Unknown",
-                    Message = "Mã QR đã hết hạn hoặc không hợp lệ."
-                };
-            }
-
-            var employee = await _uow.EmployeeRepository.GetByIdentifierAsync(userIdentifier);
-            if (employee == null)
-            {
-                return new QrCheckInResultDto
-                {
-                    Success = false,
-                    ActionType = "Unknown",
-                    Message = "Không tìm thấy hồ sơ nhân viên tương ứng."
-                };
-            }
-
-            var res = await RecordCheckInOrOutAsync(employee, null, 100m);
-            return new QrCheckInResultDto
-            {
-                Success = res.Success,
-                ActionType = res.ActionType,
-                Message = res.Message,
-                EmployeeName = res.EmployeeName,
-                Date = res.Date,
-                Time = res.Time,
-                HoursWorked = res.HoursWorked
-            };
         }
 
         public async Task<IEnumerable<AttendanceDto>> GetMyAttendanceAsync(string userIdentifier, int month, int year)

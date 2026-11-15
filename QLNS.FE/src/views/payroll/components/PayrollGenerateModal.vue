@@ -71,6 +71,15 @@ const { t } = useI18n();
 
         <label class="flex items-center gap-2 cursor-pointer select-none">
           <input
+            v-model="generateForm.includeOvertimePay"
+            type="checkbox"
+            class="rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4"
+          />
+          <span class="text-slate-700">{{ t('l_include_ot_pay_option') }}</span>
+        </label>
+
+        <label class="flex items-center gap-2 cursor-pointer select-none">
+          <input
             v-model="generateForm.includeInsurance"
             type="checkbox"
             class="rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4"

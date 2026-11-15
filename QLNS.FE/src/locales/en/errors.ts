@@ -3,7 +3,6 @@ export const errors = {
   e_load_failed: 'Failed to load data from server.',
   e_delete_failed: 'Cannot delete this record.',
   e_save_failed: 'An error occurred while saving.',
-  e_qr_scan_failed: 'Scan failed or QR code has expired.',
   e_export_failed: 'Failed to export file.',
   e_file_upload_failed: 'File upload failed. Please check format and size.',
   e_unauthorized: 'Session expired or insufficient permissions.',

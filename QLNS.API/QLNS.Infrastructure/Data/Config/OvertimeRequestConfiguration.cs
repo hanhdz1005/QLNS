@@ -20,12 +20,29 @@ namespace QLNS.Infrastructure.Data.Config
                    .HasColumnType("decimal(5,2)")
                    .IsRequired();
 
+            builder.Property(x => x.Multiplier)
+                   .HasColumnType("decimal(3,2)")
+                   .HasDefaultValue(1.50m)
+                   .IsRequired();
+
+            builder.Property(x => x.OtType)
+                   .HasConversion<int>()
+                   .HasDefaultValue(OvertimeType.Weekday);
+
+            builder.Property(x => x.CompensationType)
+                   .HasConversion<int>()
+                   .HasDefaultValue(OvertimeCompensationType.CompensatoryLeave);
+
             builder.Property(x => x.Reason)
                    .IsRequired()
                    .HasMaxLength(500);
 
             builder.Property(x => x.ApprovedBy)
                    .HasMaxLength(200)
+                   .IsRequired(false);
+
+            builder.Property(x => x.ApproverNote)
+                   .HasMaxLength(500)
                    .IsRequired(false);
 
             builder.Property(x => x.Status)

@@ -64,19 +64,3 @@ export interface FaceCheckInResultDto {
   similarityScore?: number;
   snapshotUrl?: string | null;
 }
-
-export interface QrTokenDto {
-  token: string;
-  expiresInSeconds: number;
-  generatedAt: string;
-}
-
-export interface QrCheckInResultDto {
-  success: boolean;
-  actionType: string;
-  message: string;
-  employeeName: string;
-  date: string;
-  time: string;
-  hoursWorked?: number;
-}

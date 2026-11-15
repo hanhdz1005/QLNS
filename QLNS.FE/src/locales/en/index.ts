@@ -7,6 +7,7 @@ import { toast } from './toast';
 import { errors } from './errors';
 import { face } from './face';
 import { lifecycle } from './lifecycle';
+import { settings } from './settings';
 
 export const en: LocaleSchema = {
   ...navigation,
@@ -17,4 +18,5 @@ export const en: LocaleSchema = {
   ...errors,
   ...face,
   ...lifecycle,
+  ...settings,
 };

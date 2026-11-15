@@ -138,12 +138,14 @@ namespace QLNS.Core.Common
         }
 
         /// <summary>
-        /// Phân tích dữ liệu chấm công: số ngày công hành chính thực tế, giờ OT đã duyệt và tiền OT (150%).
+        /// Phân tích dữ liệu chấm công: số ngày công hành chính thực tế, giờ OT đã duyệt và tiền OT (chỉ tính tiền cho đơn Paid).
         /// </summary>
         public static (decimal ActualWorkDays, decimal OtHours, decimal OtPay) CalculateAttendanceDetails(
             IEnumerable<Attendance> attendances,
             decimal baseSalary,
-            int standardWorkingDays)
+            int standardWorkingDays,
+            IEnumerable<OvertimeRequest>? approvedOts = null,
+            bool includeOvertimePay = true)
         {
             var actualWorkDays = 0m;
             var totalOtHours = 0m;
@@ -154,7 +156,6 @@ namespace QLNS.Core.Common
 
             foreach (var att in attendances)
             {
-                // Chỉ cộng đúng số giờ OT đã đăng ký và được phê duyệt (lưu tại OvertimeHours)
                 if (att.OvertimeHours.HasValue && att.OvertimeHours.Value > 0)
                 {
                     totalOtHours += att.OvertimeHours.Value;
@@ -168,14 +169,8 @@ namespace QLNS.Core.Common
                     case AttendanceStatus.WorkFromHome:
                         if (regHours > 0)
                         {
-                            if (regHours >= 7.0m)
-                            {
-                                actualWorkDays += 1.0m;
-                            }
-                            else if (regHours >= 3.5m)
-                            {
-                                actualWorkDays += 0.5m;
-                            }
+                            if (regHours >= 7.0m) actualWorkDays += 1.0m;
+                            else if (regHours >= 3.5m) actualWorkDays += 0.5m;
                         }
                         else if (!att.RegularHours.HasValue && (!att.HoursWorked.HasValue || att.HoursWorked.Value == 0))
                         {
@@ -187,10 +182,8 @@ namespace QLNS.Core.Common
                     case AttendanceStatus.EarlyLeave:
                         if (regHours > 0)
                         {
-                            if (regHours >= 6.5m)
-                                actualWorkDays += 1.0m;
-                            else if (regHours >= 3.5m)
-                                actualWorkDays += 0.5m;
+                            if (regHours >= 6.5m) actualWorkDays += 1.0m;
+                            else if (regHours >= 3.5m) actualWorkDays += 0.5m;
                         }
                         else if (!att.RegularHours.HasValue && (!att.HoursWorked.HasValue || att.HoursWorked.Value == 0))
                         {
@@ -198,16 +191,27 @@ namespace QLNS.Core.Common
                         }
                         break;
 
-                    case AttendanceStatus.Absent:
-                    case AttendanceStatus.Leave:
                     default:
                         break;
                 }
             }
 
-            // Tiền làm thêm giờ = Số giờ OT đã đăng ký & duyệt * Đơn giá giờ * Hệ số 1.5 (ngày thường)
-            var otPay = Math.Round(totalOtHours * hourlyRate * 1.5m, 0);
+            if (approvedOts != null)
+            {
+                var approvedList = approvedOts.Where(o => o.Status == OvertimeStatus.Approved).ToList();
+                if (approvedList.Count > 0)
+                {
+                    totalOtHours = approvedList.Sum(o => o.RegisteredHours);
+                }
+                var paidOtAmount = includeOvertimePay
+                    ? approvedList
+                        .Where(o => o.CompensationType == OvertimeCompensationType.Paid)
+                        .Sum(o => o.RegisteredHours * hourlyRate * (o.Multiplier > 0 ? o.Multiplier : 1.5m))
+                    : 0m;
+                return (actualWorkDays, totalOtHours, Math.Round(paidOtAmount, 0));
+            }
 
+            var otPay = includeOvertimePay ? Math.Round(totalOtHours * hourlyRate * 1.5m, 0) : 0m;
             return (actualWorkDays, totalOtHours, otPay);
         }
 

@@ -36,14 +36,50 @@ BEGIN
         [EmployeeId] uniqueidentifier NOT NULL,
         [EmployeeName] nvarchar(200) NOT NULL,
         [Date] date NOT NULL,
+        [StartTime] time NULL,
+        [EndTime] time NULL,
         [RegisteredHours] decimal(5,2) NOT NULL,
+        [OtType] int NOT NULL DEFAULT 1,
+        [Multiplier] decimal(3,2) NOT NULL DEFAULT 1.50,
+        [CompensationType] int NOT NULL DEFAULT 1,
         [Reason] nvarchar(500) NOT NULL,
         [Status] int NOT NULL,
         [ApprovedBy] nvarchar(200) NULL,
+        [ApproverNote] nvarchar(500) NULL,
         [CreatedDate] date NOT NULL,
         CONSTRAINT [FK_OVERTIME_REQUESTS_EMPLOYEES_EmployeeId] FOREIGN KEY ([EmployeeId]) REFERENCES [EMPLOYEES] ([Id]) ON DELETE CASCADE
     );
     CREATE INDEX [IX_OVERTIME_REQUESTS_EmployeeId_Date] ON [OVERTIME_REQUESTS] ([EmployeeId], [Date]);
+END
+
+IF COL_LENGTH('OVERTIME_REQUESTS', 'StartTime') IS NULL
+BEGIN
+    ALTER TABLE [OVERTIME_REQUESTS] ADD [StartTime] time NULL;
+END
+
+IF COL_LENGTH('OVERTIME_REQUESTS', 'EndTime') IS NULL
+BEGIN
+    ALTER TABLE [OVERTIME_REQUESTS] ADD [EndTime] time NULL;
+END
+
+IF COL_LENGTH('OVERTIME_REQUESTS', 'OtType') IS NULL
+BEGIN
+    ALTER TABLE [OVERTIME_REQUESTS] ADD [OtType] int NOT NULL DEFAULT 1;
+END
+
+IF COL_LENGTH('OVERTIME_REQUESTS', 'Multiplier') IS NULL
+BEGIN
+    ALTER TABLE [OVERTIME_REQUESTS] ADD [Multiplier] decimal(3,2) NOT NULL DEFAULT 1.50;
+END
+
+IF COL_LENGTH('OVERTIME_REQUESTS', 'CompensationType') IS NULL
+BEGIN
+    ALTER TABLE [OVERTIME_REQUESTS] ADD [CompensationType] int NOT NULL DEFAULT 1;
+END
+
+IF COL_LENGTH('OVERTIME_REQUESTS', 'ApproverNote') IS NULL
+BEGIN
+    ALTER TABLE [OVERTIME_REQUESTS] ADD [ApproverNote] nvarchar(500) NULL;
 END
 
 IF NOT EXISTS (SELECT 1 FROM [OVERTIME_REQUESTS]) AND EXISTS (SELECT 1 FROM [EMPLOYEES])

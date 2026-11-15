@@ -60,6 +60,7 @@ namespace QLNS.Core.Dto
         public int Year { get; set; }
         public bool CalculateAttendance { get; set; } = true;
         public int? StandardWorkingDays { get; set; }
+        public bool IncludeOvertimePay { get; set; } = true;
         public bool IncludeInsurance { get; set; } = true;
         public bool IncludeTax { get; set; } = true;
         public bool SaveToDatabase { get; set; } = true;
@@ -106,22 +107,6 @@ namespace QLNS.Core.Dto
         public decimal AverageNetSalary { get; set; }
         public decimal MaxSalary { get; set; }
         public decimal MinSalary { get; set; }
-    }
-
-    public class QrCheckInDto
-    {
-        public string QrToken { get; set; } = string.Empty;
-    }
-
-    public class QrCheckInResultDto
-    {
-        public bool Success { get; set; } = true;
-        public string ActionType { get; set; } = string.Empty; // "CheckIn" hoặc "CheckOut"
-        public string Message { get; set; } = string.Empty;
-        public string EmployeeName { get; set; } = string.Empty;
-        public DateOnly Date { get; set; }
-        public TimeSpan Time { get; set; }
-        public decimal? HoursWorked { get; set; }
     }
 
     public class HrAlertsDto

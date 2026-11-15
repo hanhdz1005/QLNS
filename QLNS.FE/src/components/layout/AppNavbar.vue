@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import { useCompanySettingsStore } from '@/stores/companySettings';
 import { useI18n } from '@/locales';
 import { reportApi } from '@/api/report.api';
 import type { HrAlertsDto } from '@/types';
@@ -11,6 +12,7 @@ import {
   Bell,
   ChevronDown,
   User,
+  Settings,
   LogOut,
   AlertCircle,
   Cake,
@@ -25,6 +27,7 @@ defineEmits<{
 
 const route = useRoute();
 const authStore = useAuthStore();
+const settingsStore = useCompanySettingsStore();
 const { locale, toggleLocale, t } = useI18n();
 
 const isUserMenuOpen = ref(false);
@@ -73,7 +76,12 @@ const handleLogout = () => {
 </script>
 
 <template>
-  <header class="h-13 sm:h-14 bg-white border-b border-slate-200/80 shrink-0 z-30 flex items-center justify-between px-3 sm:px-5 shadow-2xs">
+  <header
+    :class="[
+      'h-13 sm:h-14 shrink-0 z-30 flex items-center justify-between px-3 sm:px-5 shadow-2xs transition-colors duration-300',
+      settingsStore.currentTheme.navbarBgClass,
+    ]"
+  >
     <div class="flex items-center gap-3">
       <button
         @click="$emit('openMobileSidebar')"
@@ -92,7 +100,7 @@ const handleLogout = () => {
       <!-- Page Title -->
       <div class="flex items-center gap-2">
         <span class="text-sm font-semibold text-slate-800 hidden sm:inline">
-          {{ route.meta.title ? String(route.meta.title) : t('l_system_name') }}
+          {{ route.meta.titleKey ? t(route.meta.titleKey as any) : route.meta.title ? String(route.meta.title) : t('l_system_name') }}
         </span>
       </div>
     </div>
@@ -103,7 +111,7 @@ const handleLogout = () => {
       <button
         @click="toggleLocale"
         class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors border border-slate-200"
-        :title="locale === 'vi' ? 'Switch to English' : 'Chuyển sang Tiếng Việt'"
+        :title="t('b_switch_language')"
       >
         <Languages class="w-3.5 h-3.5 text-indigo-600" />
         <span>{{ locale === 'vi' ? 'VI' : 'EN' }}</span>
@@ -212,7 +220,7 @@ const handleLogout = () => {
         </div>
       </div>
 
-      <!-- User Menu -->
+      <!-- User Menu (Top-Right Profile & Company Settings Dropdown) -->
       <div class="relative">
         <button
           @click="isUserMenuOpen = !isUserMenuOpen; isAlertsOpen = false"
@@ -235,7 +243,7 @@ const handleLogout = () => {
         <!-- Dropdown Menu -->
         <div
           v-if="isUserMenuOpen"
-          class="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 py-1.5 z-50 animate-fade-in"
+          class="absolute right-0 mt-2 w-60 bg-white rounded-2xl shadow-xl border border-slate-100 py-1.5 z-50 animate-fade-in"
         >
           <div class="px-4 py-2.5 border-b border-slate-100 mb-1">
             <div class="text-xs font-semibold text-slate-800">{{ authStore.user?.displayName }}</div>
@@ -250,6 +258,17 @@ const handleLogout = () => {
             <User class="w-4 h-4 text-slate-400" />
             {{ t('l_my_profile_and_attendance') }}
           </router-link>
+
+          <router-link
+            to="/settings"
+            @click="isUserMenuOpen = false"
+            class="flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-indigo-700 hover:bg-indigo-50/70 transition-colors"
+          >
+            <Settings class="w-4 h-4 text-indigo-600" />
+            {{ t('n_company_settings') }}
+          </router-link>
+
+          <div class="my-1 border-t border-slate-100" />
 
           <button
             @click="handleLogout"

@@ -3,7 +3,6 @@ export const errors = {
   e_load_failed: 'Không thể tải dữ liệu từ máy chủ.',
   e_delete_failed: 'Không thể xóa bản ghi này.',
   e_save_failed: 'Có lỗi xảy ra khi lưu dữ liệu.',
-  e_qr_scan_failed: 'Quét mã thất bại hoặc mã QR đã hết hạn.',
   e_export_failed: 'Không thể xuất tệp dữ liệu.',
   e_file_upload_failed: 'Tải lên tệp thất bại. Vui lòng kiểm tra định dạng và dung lượng.',
   e_unauthorized: 'Phiên đăng nhập đã hết hạn hoặc không có quyền truy cập.',

@@ -2,6 +2,7 @@
 import { ref, reactive, onMounted, computed } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useToastStore } from '@/stores/toast';
+import { useCompanySettingsStore } from '@/stores/companySettings';
 import { useI18n } from '@/locales';
 import { salaryApi } from '@/api/salary.api';
 import { exportApi } from '@/api/export.api';
@@ -16,6 +17,7 @@ import { DollarSign, FileText, User } from 'lucide-vue-next';
 
 const authStore = useAuthStore();
 const toastStore = useToastStore();
+const settingsStore = useCompanySettingsStore();
 const { t } = useI18n();
 
 const activeTab = ref<'company' | 'my-payslip'>('company');
@@ -54,6 +56,7 @@ const generateForm = reactive<PayrollGenerateDto>({
   year: selectedYear.value,
   calculateAttendance: true,
   standardWorkingDays: 22,
+  includeOvertimePay: true,
   includeInsurance: true,
   includeTax: true,
   saveToDatabase: true,
@@ -62,6 +65,10 @@ const generateForm = reactive<PayrollGenerateDto>({
 const openGenerateModal = () => {
   generateForm.month = selectedMonth.value;
   generateForm.year = selectedYear.value;
+  generateForm.standardWorkingDays = settingsStore.settings.standardWorkingDays;
+  generateForm.includeOvertimePay = settingsStore.settings.includeOvertimePayInPayroll;
+  generateForm.includeInsurance = settingsStore.settings.includeInsuranceByDefault;
+  generateForm.includeTax = settingsStore.settings.includeTaxByDefault;
   showGenerateModal.value = true;
 };
 

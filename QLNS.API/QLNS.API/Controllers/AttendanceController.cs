@@ -192,37 +192,6 @@ namespace QLNS.API.Controllers
                 errorCode: code));
         }
 
-        // Legacy QR Endpoints
-        [AllowAnonymous]
-        [HttpGet("qr-token")]
-        public async Task<ActionResult> GetQrToken()
-        {
-            var (token, expiresInSeconds) = await _service.GenerateQrTokenAsync();
-            return Ok(Result<object>.Success(new
-            {
-                token,
-                expiresInSeconds,
-                generatedAt = DateTime.UtcNow
-            }));
-        }
-
-        [Authorize(Roles = RoleConstants.AllRoles)]
-        [HttpPost("qr-checkin")]
-        public async Task<ActionResult> QrCheckIn([FromBody] QrCheckInDto dto)
-        {
-            var userIdentifier = User.GetUserIdentifier();
-            if (string.IsNullOrEmpty(userIdentifier))
-                return Unauthorized(Result<string>.Failure("Không xác định được danh tính người dùng đăng nhập.", errorCode: "UNAUTHORIZED"));
-
-            var result = await _service.QrCheckInAsync(dto.QrToken, userIdentifier);
-            if (!result.Success)
-            {
-                return BadRequest(Result<QrCheckInResultDto>.Failure(result.Message));
-            }
-
-            return Ok(Result<QrCheckInResultDto>.Success(result));
-        }
-
         [Authorize(Roles = RoleConstants.AllRoles)]
         [HttpGet("my-attendance")]
         public async Task<ActionResult> GetMyAttendance([FromQuery] int? month = null, [FromQuery] int? year = null)

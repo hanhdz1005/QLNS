@@ -16,8 +16,6 @@ export const buttons = {
   b_export_json: 'Export JSON',
   b_export_csv_staff: 'Export Staff CSV',
   b_export_all_staff_csv: 'Export All Employees (CSV)',
-  b_scan_qr: 'Simulate QR Scan Now',
-  b_open_qr_kiosk: 'Open QR Kiosk',
   b_logout: 'Log Out',
   b_login: 'Sign In',
   b_approve: 'Approve',

@@ -25,10 +25,6 @@ namespace QLNS.Core.Interfaces.IService
             FaceCheckInDto dto,
             string? fallbackUserEmbedding = null);
 
-        // Chấm công bằng mã QR động (Legacy / Fallback)
-        Task<(string Token, int ExpiresInSeconds)> GenerateQrTokenAsync();
-        Task<QrCheckInResultDto> QrCheckInAsync(string qrToken, string userIdentifier);
-
         // Xem chấm công cá nhân (ESS)
         Task<IEnumerable<AttendanceDto>> GetMyAttendanceAsync(string userIdentifier, int month, int year);
     }
